@@ -1,10 +1,13 @@
-﻿  DuiFrameWnd.cpp
+﻿  AVPlayer.cpp
+  MainWnd.cpp
 d:\project\player\duilib\Core/UIManager.h(45): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
-DuiFrameWnd.cpp(534): warning C4101: “pNodeTmp”: 未引用的局部变量
-  MenuWnd.cpp
-d:\project\player\duilib\Core/UIManager.h(45): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
+MainWnd.cpp(173): warning C4101: “wsaData”: 未引用的局部变量
+MainWnd.cpp(488): warning C4101: “pNodeTmp”: 未引用的局部变量
   main.cpp
 d:\project\player\duilib\Core/UIManager.h(45): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
+  MenuWnd.cpp
+d:\project\player\duilib\Core/UIManager.h(45): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
+  PlayList.cpp
   正在生成代码
   已完成代码的生成
   XMP.vcxproj -> D:\Project\Player\XMP\Release\XMP.exe

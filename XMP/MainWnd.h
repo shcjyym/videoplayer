@@ -12,6 +12,7 @@ public:
 
     DUI_DECLARE_MESSAGE_MAP()
     virtual void InitWindow();
+	static DWORD WINAPI ThreadProc(LPVOID lpParameter);
     virtual CControlUI* CreateControl(LPCTSTR pstrClassName);
     virtual void Notify(TNotifyUI& msg);
     virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -35,15 +36,16 @@ public:
     void AddFile(const std::vector<string_t> &vctString);// 添加文件到播放列表
 
 private:
-    CAVPlayer       m_cAVPlayer;// 播放器类
+	CAVPlayer       m_cAVPlayer;// 播放器类
     CDuiString      m_strPath;// 当前文件的路径
     CSliderUI       *m_Slider;// 文件播放进度
     CLabelUI        *m_VideoTime;// 文件播放时间
     WINDOWPLACEMENT m_OldWndPlacement;// 保存窗口原来的位置
     bool            m_FullScreen;// 是否在全屏模式
-   
+	HANDLE      hThread;
     void ShowPlayButton(bool bShow);// 显示播放按钮
     void ShowPlayWnd(bool bShow);// 显示播放窗口
+	void ShowConnectButton(bool bShow);// 显示通信连接按钮
     void ShowControlsForPlay(bool bShow);// 当开始播放或停止时，显示或隐藏一些控件
 
     void AdaptWindowSize(UINT cxScreen);// 根据屏幕分辨率自动调整窗口大小

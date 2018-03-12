@@ -1,10 +1,14 @@
+#include<winsock2.h>
 #include "MainWnd.h"
 #include "source.h"
-#include <windowsx.h>
 #include <algorithm>
 #include <time.h>
 #include <comutil.h>
+#include <process.h> 
+#include <commdlg.h>
 #include "MenuWnd.h"
+#include <winapifamily.h>
+#pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib, "comsupp.lib")
 
 
@@ -112,6 +116,35 @@ CDuiFrameWnd::~CDuiFrameWnd()
 {
 }
 
+SOCKET serSocket; //建立服务器
+sockaddr_in serAddr; //服务器地址
+sockaddr_in remoteAddr; //远程控制客户端地址
+DWORD WINAPI CDuiFrameWnd::ThreadProc(LPVOID lpParameter)
+{
+	
+	WSADATA wsaData;
+	WORD sockVersion = MAKEWORD(2, 2);
+	serSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	
+	serAddr.sin_family = AF_INET;
+	serAddr.sin_port = htons(8888);
+	serAddr.sin_addr.S_un.S_addr = INADDR_ANY;
+	if (bind(serSocket, (sockaddr *)&serAddr, sizeof(serAddr)) == SOCKET_ERROR)
+	{
+		closesocket(serSocket);
+	}
+	
+	int nAddrLen = sizeof(remoteAddr);
+	char recvData[255];
+	int ret = recvfrom(serSocket, recvData, 255, 0, (sockaddr*)&remoteAddr, &nAddrLen);
+	char * sendData = "一个来自服务端的UDP数据包";
+	sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
+	
+	//closesocket(serSocket);//单击连接后按钮禁灰，不关闭套接字
+	return 0;
+}
+
+
 DUI_BEGIN_MESSAGE_MAP(CDuiFrameWnd, CNotifyPump)
 DUI_ON_MSGTYPE(DUI_MSGTYPE_CLICK,OnClick)
 DUI_END_MESSAGE_MAP()
@@ -119,7 +152,6 @@ DUI_END_MESSAGE_MAP()
 void CDuiFrameWnd::InitWindow()
 {
     SetIcon(IDI_ICON1);
-
     // 根据分辨率自动调节窗口大小
     MONITORINFO myMonitor = {};
 	myMonitor.cbSize = sizeof(myMonitor);
@@ -164,6 +196,7 @@ void CDuiFrameWnd::InitWindow()
         m_cAVPlayer.SetCbPosChanged(CbPosChanged);
         m_cAVPlayer.SetCbEndReached(CbEndReached);
     }
+	m_cAVPlayer.Play("test1.avi");//添加此处预加载通信部分dll ??? 有待改正 ???
 }
 
 CControlUI* CDuiFrameWnd::CreateControl( LPCTSTR pstrClassName )
@@ -208,16 +241,34 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
     {
         ShowPlaylist(false);
     }
+	else if (msg.pSender->GetName() == _T("btnGetConnect"))
+	{
+		CControlUI *pbtnGetConnect = m_PaintManager.FindControl(_T("btnGetConnect"));
+		pbtnGetConnect->SetEnabled(0);
+		hThread = ::CreateThread(NULL, 0, ThreadProc, this, 0, NULL);
+	}
+	else if (msg.pSender->GetName() == _T("btnCloseConnect"))
+	{
+		closesocket(serSocket);
+		CControlUI *pbtnGetConnect = m_PaintManager.FindControl(_T("btnGetConnect"));
+		pbtnGetConnect->SetEnabled(-1);
+	}
 	else if (msg.pSender->GetName() == _T("btnOpen") || msg.pSender->GetName() == _T("btnOpenMini"))
 	{
 		OpenFileDialog();
 	}
     else if( msg.pSender->GetName() == _T("btnPlay") ) 
     {
+		char * sendData = "2";
+		int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
         Play(true);
     }
     else if( msg.pSender->GetName() == _T("btnPause") ) 
     {
+		char * sendData = "3";
+		int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
         Play(false);
     }
     else if( msg.pSender->GetName() == _T("btnStop") ) 
@@ -312,8 +363,8 @@ void CDuiFrameWnd::AdaptWindowSize( UINT cxScreen )
     SIZE FixSearchBtn = {201, 0};
     if(cxScreen <= 1024)      // 800*600  1024*768  
     {
-        X = 775;
-        Y = 470;
+        X = 765;
+        Y = 460;
     } 
     else if(cxScreen <= 1280) // 1152*864  1280*800  1280*960  1280*1024
     {
@@ -322,16 +373,16 @@ void CDuiFrameWnd::AdaptWindowSize( UINT cxScreen )
     }
     else if(cxScreen <= 1366) // 1360*768 1366*768
     {
-        X = 1058;
-        Y = 656;
+        X = 1028;
+        Y = 626;
         WidthList        += 21;
         WidthSearchEdit  += 21;
         FixSearchBtn.cx += 21;
     }
     else                      // 1440*900
     {
-        X = 1224;
-        Y = 760;
+        X = 1200;
+        Y = 720;
         WidthList        += 66;
         WidthSearchEdit  += 66;
         FixSearchBtn.cx += 66;
@@ -403,18 +454,29 @@ void CDuiFrameWnd::ShowPlayWnd( bool bShow )
         pctnClient->SetVisible(! bShow);
         pctnSlider->SetVisible(bShow);
         // 打开文件时
-        if (bShow)  
+        if (bShow)
         {
             pbtnWnd->SetVisible(bShow);
             pctnMusic->SetVisible(! bShow);
         }
         // 关闭文件时
-        else        
+        else  
         {
             pctnMusic->SetVisible(false);
             pbtnWnd->SetVisible(false);
         }
     }
+}
+
+void CDuiFrameWnd::ShowConnectButton(bool bShow)
+{
+	CControlUI *pbtnGetConnect = m_PaintManager.FindControl(_T("btnGetConnect"));
+	CControlUI *pbtnCloseConnect = m_PaintManager.FindControl(_T("btnCloseConnect"));
+	if (pbtnGetConnect && pbtnCloseConnect)
+	{
+		pbtnGetConnect->SetVisible(bShow);
+		pbtnCloseConnect->SetVisible(bShow);
+	}
 }
 
 void CDuiFrameWnd::ShowControlsForPlay( bool bShow )

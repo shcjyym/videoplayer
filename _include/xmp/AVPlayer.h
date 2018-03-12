@@ -1,7 +1,7 @@
 #ifndef __AVPlayer_H__
 #define __AVPlayer_H__
 #include <iostream>
-#include <Windows.h>
+#include <windows.h>
 
 typedef void (* pfnCallback) (void *data);// VLC事件的回调函数指针
 struct libvlc_instance_t;

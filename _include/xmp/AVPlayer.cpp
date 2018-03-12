@@ -171,7 +171,7 @@ void CAVPlayer::Refresh()
 	{
 		libvlc_time_t i_time = 1000;
 		libvlc_time_t i_ftime_low = 5000;
-		libvlc_time_t i_ftime_high = 5100;
+		libvlc_time_t i_ftime_high = 5100;//refresh函数的最大问题在于判断所需时间的长度是否足够，漏掉信号的处理方式以及验证方案
 		if (i_time < 0)
 		{
 			i_time = 0;
