@@ -1,2 +1,4 @@
 VideoPlayer
-视频播放器+视频中控
+video player+controlcenter 
+The language we use:C++ XML
+Plugin-in:vlc

@@ -484,7 +484,6 @@ void CDuiFrameWnd::ShowControlsForPlay( bool bShow )
 	m_VideoTime->SetText(_T(""));
     ShowPlayWnd(bShow);
     ShowPlaylist(! bShow);
-    ShowPlayButton(! bShow);
 }
 
 void CDuiFrameWnd::OpenFileDialog()
@@ -566,6 +565,12 @@ void CDuiFrameWnd::Stop()
 {
 	m_cAVPlayer.Stop();
 	ShowControlsForPlay(false);
+	CControlUI *pbtnPlay = m_PaintManager.FindControl(_T("btnPlay"));
+	CControlUI *pbtnPause = m_PaintManager.FindControl(_T("btnPause"));
+	pbtnPlay->SetVisible(true);
+	pbtnPause->SetVisible(false);
+	// 进度条归零问题，目前停止过后进度条停在原先位置，现在的方案：在Stop()函数内部加入回调，让POS位置归零，问题在于归零需要将nPosChanged
+	// 参数传回，需要在cAVPlayer.cpp中重新加入，加入区域应在初始化阶段，即为打开文件期间进行的媒体初始化。
 }
 
 void CDuiFrameWnd::FullScreen( bool bFull )

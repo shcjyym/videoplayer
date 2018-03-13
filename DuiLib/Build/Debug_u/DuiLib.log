@@ -49,6 +49,8 @@ Control\UIDateTime.cpp(231): warning C4302: “类型转换”: 从“LPWSTR”�
 Control\UIButton.cpp(107): warning C4302: “类型转换”: 从“LPWSTR”到“WORD”截断
   UIActiveX.cpp
   正在生成代码...
+  stb_image.c
+  XUnzip.cpp
 C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(1189,5): warning MSB8012: TargetPath(D:\Project\Player\DuiLib\.\Build\Debug_u\DuiLib.dll) does not match the Linker's OutputFile property value (D:\Project\Player\_bin\DuiLib_ud.dll). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
 C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(1191,5): warning MSB8012: TargetName(DuiLib) does not match the Linker's OutputFile property value (DuiLib_ud). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
     正在创建库 ../_Lib/DuiLib_ud.lib 和对象 ../_Lib/DuiLib_ud.exp

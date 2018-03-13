@@ -30,6 +30,7 @@ public:
     void SeekForward();// 快进
     void SeekBackward();// 快退
 	void Refresh();// 刷新
+	void FirstFrame();// 跳回第一帧
 
     void SetHWND(HWND hwnd);// 设置视频显示的窗口句柄
     HWND GetHWND();// 获取视频显示的窗口句柄
