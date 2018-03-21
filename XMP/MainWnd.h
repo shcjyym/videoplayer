@@ -25,6 +25,7 @@ public:
     LRESULT OnPlaying(HWND hwnd, WPARAM wParam, LPARAM lParam);// 文件头读取完毕，开始播放
     LRESULT OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam);// 进度改变，播放器传回来的进度
     LRESULT OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam);// 文件播放完毕
+	LRESULT OnAddIP(HWND hwnd, WPARAM wParam, LPARAM lParam);// 添加IP信息
     bool    OnPosChanged(void* param);// 进度改变，用户主动改变进度
     bool    OnVolumeChanged(void* param);// 音量改变
 
@@ -34,6 +35,7 @@ public:
     void OpenFileDialog();// 打开文件窗口
     void ShowPlaylist(bool bShow);// 显示播放列表
     void AddFile(const std::vector<string_t> &vctString);// 添加文件到播放列表
+	void AddConnectID(LPCTSTR str);// 添加通信连接IP地址
 
 private:
 	CAVPlayer       m_cAVPlayer;// 播放器类

@@ -76,8 +76,9 @@ void CAVPlayer::Stop()
 {
     if (m_pVLC_Player)
     {
-        libvlc_media_player_stop (m_pVLC_Player);      /* Stop playing */    
-        libvlc_media_player_release (m_pVLC_Player);   /* Free the media_player */
+		libvlc_media_player_set_position(m_pVLC_Player, 0);
+        libvlc_media_player_stop (m_pVLC_Player);
+        libvlc_media_player_release (m_pVLC_Player);
         m_pVLC_Player = NULL;
     }
 }

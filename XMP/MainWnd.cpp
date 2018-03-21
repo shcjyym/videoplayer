@@ -11,17 +11,17 @@
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib, "comsupp.lib")
 
-
-#define WM_USER_PLAYING         WM_USER + 1// 开始播放文件
-#define WM_USER_POS_CHANGED     WM_USER + 2// 文件播放位置改变
+#define WM_USER_PLAYING               WM_USER + 1// 开始播放文件
+#define WM_USER_POS_CHANGED    WM_USER + 2// 文件播放位置改变
 #define WM_USER_END_REACHED     WM_USER + 3// 播放完毕
+#define WM_USER_ADD_IP                 WM_USER + 4
 
 //文件类型
 const TCHAR STR_FILE_FILTER[] =
 _T("All Files(*.*)\0*.*\0")
 _T("Movie Files(*.rmvb,*.mpeg,etc)\0*.rm;*.rmvb;*.flv;*.f4v;*.avi;*.3gp;*.mp4;*.wmv;*.mpeg;*.mpga;*.asf;*.dat;*.mov;*.dv;*.mkv;*.mpg;*.trp;*.ts;*.vob;*.xv;*.m4v;*.dpg;\0");
 
-// 查找 
+// 查找
 const TCHAR STR_FILE_MOVIE[] =
 _T("Movie Files(*.rmvb,*.mpeg,etc)|*.rm;*.rmvb;*.flv;*.f4v;*.avi;*.3gp;*.mp4;*.wmv;*.mpeg;*.mpga;*.asf;*.dat;*.mov;*.dv;*.mkv;*.mpg;*.trp;*.ts;*.vob;*.xv;*.m4v;*.dpg;|");
 
@@ -116,16 +116,18 @@ CDuiFrameWnd::~CDuiFrameWnd()
 {
 }
 
-SOCKET serSocket; //建立服务器
-sockaddr_in serAddr; //服务器地址
-sockaddr_in remoteAddr; //远程控制客户端地址
+SOCKET serSocket; // 建立服务器
+sockaddr_in serAddr; // 服务器地址
+sockaddr_in remoteAddr; // 远程控制客户端地址
+CDuiString address_ip; // 列表中显示内容
+char recvData[255]; // 获取的数据内容
 DWORD WINAPI CDuiFrameWnd::ThreadProc(LPVOID lpParameter)
 {
-	
+	CDuiFrameWnd* pDlg;
+	pDlg = (CDuiFrameWnd*)lpParameter;
 	WSADATA wsaData;
 	WORD sockVersion = MAKEWORD(2, 2);
 	serSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	
 	serAddr.sin_family = AF_INET;
 	serAddr.sin_port = htons(8888);
 	serAddr.sin_addr.S_un.S_addr = INADDR_ANY;
@@ -133,17 +135,23 @@ DWORD WINAPI CDuiFrameWnd::ThreadProc(LPVOID lpParameter)
 	{
 		closesocket(serSocket);
 	}
-	
 	int nAddrLen = sizeof(remoteAddr);
-	char recvData[255];
-	int ret = recvfrom(serSocket, recvData, 255, 0, (sockaddr*)&remoteAddr, &nAddrLen);
+	int ret = recvfrom(serSocket, recvData, 255, 0, (sockaddr *)&remoteAddr, &nAddrLen);
 	char * sendData = "一个来自服务端的UDP数据包";
 	sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
-	
+	if (recvData[0] == '1') {
+		size_t len = strlen(recvData) + 1;
+		size_t converted = 0;
+		wchar_t *WStr;
+		WStr = (wchar_t*)malloc(len * sizeof(wchar_t));
+		mbstowcs_s(&converted, WStr, len, recvData, _TRUNCATE);
+		//把char类型的recvData转化为wchar_t类型的WStr,否则显示为乱码
+		address_ip.Format(_T("%s"), WStr);
+		::PostMessage(pDlg->m_hWnd, WM_USER_ADD_IP, 0, 0);
+	}
 	//closesocket(serSocket);//单击连接后按钮禁灰，不关闭套接字
 	return 0;
 }
-
 
 DUI_BEGIN_MESSAGE_MAP(CDuiFrameWnd, CNotifyPump)
 DUI_ON_MSGTYPE(DUI_MSGTYPE_CLICK,OnClick)
@@ -262,6 +270,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		char * sendData = "2";
 		int nAddrLen = sizeof(remoteAddr);
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
+
         Play(true);
     }
     else if( msg.pSender->GetName() == _T("btnPause") ) 
@@ -269,6 +278,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		char * sendData = "3";
 		int nAddrLen = sizeof(remoteAddr);
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
+
         Play(false);
     }
     else if( msg.pSender->GetName() == _T("btnStop") ) 
@@ -329,9 +339,10 @@ LRESULT CDuiFrameWnd::HandleMessage( UINT uMsg, WPARAM wParam, LPARAM lParam )
     case WM_USER_POS_CHANGED:
         return OnPosChanged(*this, wParam, lParam);
     case WM_USER_END_REACHED:
-        return OnEndReached(*this, wParam, lParam);       
+        return OnEndReached(*this, wParam, lParam);
+	case WM_USER_ADD_IP:
+		return OnAddIP(*this, wParam, lParam);
     }
-
     return lRes;
 }
 
@@ -444,10 +455,9 @@ void CDuiFrameWnd::ShowPlayWnd( bool bShow )
     CControlUI *pbtnStop    = m_PaintManager.FindControl(_T("btnStop"));
     CControlUI *pbtnScreen  = m_PaintManager.FindControl(_T("btnScreenFull"));
     CControlUI *pctnClient  = m_PaintManager.FindControl(_T("ctnClient"));
-    CControlUI *pctnMusic   = m_PaintManager.FindControl(_T("ctnMusic"));
     CControlUI *pctnSlider  = m_PaintManager.FindControl(_T("ctnSlider"));
 
-    if (pbtnWnd && pbtnStop && pbtnScreen && pctnClient && pctnMusic && pctnSlider)
+    if (pbtnWnd && pbtnStop && pbtnScreen && pctnClient  && pctnSlider)
     {
         pbtnStop->SetEnabled(bShow);
         pbtnScreen->SetEnabled(bShow);
@@ -457,12 +467,10 @@ void CDuiFrameWnd::ShowPlayWnd( bool bShow )
         if (bShow)
         {
             pbtnWnd->SetVisible(bShow);
-            pctnMusic->SetVisible(! bShow);
         }
         // 关闭文件时
         else  
         {
-            pctnMusic->SetVisible(false);
             pbtnWnd->SetVisible(false);
         }
     }
@@ -527,9 +535,30 @@ void CDuiFrameWnd::AddFile( const std::vector<string_t> &vctString)
             _tsplitpath_s(vctString[i].c_str(), NULL, 0, NULL, 0, szName, _MAX_FNAME, szExt, _MAX_EXT);
             strTmp.Format(_T("%s%s"), szName, szExt);   // 文件名
             uWantedCount++;
-        }        
+        }
     }
 	Play(strTmp);//第一次打开显示时候不应该加入
+}
+
+void CDuiFrameWnd::AddConnectID(LPCTSTR str)
+{
+	CTreeNodeUI *pNodeTmp, *pNodePlaylist;
+	pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodePlaylist")));
+	if (!pNodePlaylist)
+	{
+		return;
+	}
+	pNodeTmp = new CTreeNodeUI;
+	pNodeTmp->SetItemTextColor(0xFFC8C6CB);
+	pNodeTmp->SetItemHotTextColor(0xFFC8C6CB);
+	pNodeTmp->SetSelItemTextColor(0xFFC8C6CB);
+	pNodeTmp->SetTag(U_TAG_PLAYLIST);
+	pNodeTmp->SetItemText(str);
+	pNodeTmp->SetAttribute(_T("height"), _T("22"));
+	pNodeTmp->SetAttribute(_T("inset"), _T("7,0,0,0"));
+	pNodeTmp->SetAttribute(_T("itemattr"), _T("valign=\"vcenter\" font=\"4\""));
+	pNodeTmp->SetAttribute(_T("folderattr"), _T("width=\"0\" float=\"true\""));
+	pNodePlaylist->Add(pNodeTmp);
 }
 
 void CDuiFrameWnd::Play( bool bPlay )
@@ -569,7 +598,8 @@ void CDuiFrameWnd::Stop()
 	CControlUI *pbtnPause = m_PaintManager.FindControl(_T("btnPause"));
 	pbtnPlay->SetVisible(true);
 	pbtnPause->SetVisible(false);
-	// 进度条归零问题，目前停止过后进度条停在原先位置，现在的方案：在Stop()函数内部加入回调，让POS位置归零，问题在于归零需要将nPosChanged
+	m_Slider->SetValue(m_cAVPlayer.GetPos());
+	// 方案：在Stop()函数内部加入回调，让POS位置归零，问题在于归零需要将nPosChanged
 	// 参数传回，需要在cAVPlayer.cpp中重新加入，加入区域应在初始化阶段，即为打开文件期间进行的媒体初始化。
 }
 
@@ -634,6 +664,12 @@ LRESULT CDuiFrameWnd::OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam )
 {
 	Stop();
     return TRUE;
+}
+
+LRESULT CDuiFrameWnd::OnAddIP(HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+	AddConnectID(address_ip);
+	return TRUE;
 }
 
 bool CDuiFrameWnd::OnPosChanged(void* param)
