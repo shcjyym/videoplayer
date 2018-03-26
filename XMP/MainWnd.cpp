@@ -25,9 +25,6 @@ _T("Movie Files(*.rmvb,*.mpeg,etc)\0*.rm;*.rmvb;*.flv;*.f4v;*.avi;*.3gp;*.mp4;*.
 const TCHAR STR_FILE_MOVIE[] =
 _T("Movie Files(*.rmvb,*.mpeg,etc)|*.rm;*.rmvb;*.flv;*.f4v;*.avi;*.3gp;*.mp4;*.wmv;*.mpeg;*.mpga;*.asf;*.dat;*.mov;*.dv;*.mkv;*.mpg;*.trp;*.ts;*.vob;*.xv;*.m4v;*.dpg;|");
 
-// TreeView控件播放列表的文件路径节点
-const UINT_PTR U_TAG_PLAYLIST = 1; 
-
 std::string UnicodeConvert(const std::wstring& strWide, UINT uCodePage)
 {
 	std::string strANSI;
@@ -121,6 +118,7 @@ sockaddr_in serAddr; // 服务器地址
 sockaddr_in remoteAddr; // 远程控制客户端地址
 CDuiString address_ip; // 列表中显示内容
 char recvData[255]; // 获取的数据内容
+int connect_num=1;// 连接数目
 DWORD WINAPI CDuiFrameWnd::ThreadProc(LPVOID lpParameter)
 {
 	CDuiFrameWnd* pDlg;
@@ -161,10 +159,10 @@ void CDuiFrameWnd::InitWindow()
 {
     SetIcon(IDI_ICON1);
     // 根据分辨率自动调节窗口大小
-    MONITORINFO myMonitor = {};
-	myMonitor.cbSize = sizeof(myMonitor);
-    ::GetMonitorInfo(::MonitorFromWindow(*this, MONITOR_DEFAULTTONEAREST), &myMonitor);
-    AdaptWindowSize(myMonitor.rcMonitor.right - myMonitor.rcMonitor.left);
+    MONITORINFO Monitor = {};
+	Monitor.cbSize = sizeof(Monitor);
+    ::GetMonitorInfo(::MonitorFromWindow(*this, MONITOR_DEFAULTTONEAREST), &Monitor);
+    AdaptWindowSize(Monitor.rcMonitor.right - Monitor.rcMonitor.left);
     ::GetWindowPlacement(*this, &m_OldWndPlacement);
 
     // 初始化CActiveXUI控件
@@ -192,7 +190,7 @@ void CDuiFrameWnd::InitWindow()
         return;
     }
 
-    pSilderVol->OnNotify    += MakeDelegate(this, &CDuiFrameWnd::OnVolumeChanged);
+	pSilderVol->OnNotify += MakeDelegate(this, &CDuiFrameWnd::OnVolumeChanged);
 	m_Slider->OnNotify += MakeDelegate(this, &CDuiFrameWnd::OnPosChanged);
 
     // 设置播放器的窗口句柄和回调函数
@@ -204,7 +202,7 @@ void CDuiFrameWnd::InitWindow()
         m_cAVPlayer.SetCbPosChanged(CbPosChanged);
         m_cAVPlayer.SetCbEndReached(CbEndReached);
     }
-	m_cAVPlayer.Play("test1.avi");//添加此处预加载通信部分dll ??? 有待改正 ???
+	m_cAVPlayer.Play("test1.avi");//添加此处预加载通信部分 ??? 有待改正 ???
 }
 
 CControlUI* CDuiFrameWnd::CreateControl( LPCTSTR pstrClassName )
@@ -257,9 +255,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	}
 	else if (msg.pSender->GetName() == _T("btnCloseConnect"))
 	{
-		closesocket(serSocket);
-		CControlUI *pbtnGetConnect = m_PaintManager.FindControl(_T("btnGetConnect"));
-		pbtnGetConnect->SetEnabled(-1);
+		CloseConnect();
 	}
 	else if (msg.pSender->GetName() == _T("btnOpen") || msg.pSender->GetName() == _T("btnOpenMini"))
 	{
@@ -270,7 +266,6 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		char * sendData = "2";
 		int nAddrLen = sizeof(remoteAddr);
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
-
         Play(true);
     }
     else if( msg.pSender->GetName() == _T("btnPause") ) 
@@ -369,9 +364,9 @@ LRESULT CDuiFrameWnd::ResponseDefaultKeyEvent(WPARAM wParam)
 
 void CDuiFrameWnd::AdaptWindowSize( UINT cxScreen )
 {
-    int X = 968, Y = 600;
-    int WidthList = 236, WidthSearchEdit = 193;
-    SIZE FixSearchBtn = {201, 0};
+	int X = 968, Y = 600;
+	int WidthList = 236, WidthSearchEdit = 193;
+	SIZE FixSearchBtn = { 201, 0 };
     if(cxScreen <= 1024)      // 800*600  1024*768  
     {
         X = 765;
@@ -386,19 +381,19 @@ void CDuiFrameWnd::AdaptWindowSize( UINT cxScreen )
     {
         X = 1028;
         Y = 626;
-        WidthList        += 21;
-        WidthSearchEdit  += 21;
-        FixSearchBtn.cx += 21;
+		WidthList += 21;
+		WidthSearchEdit += 21;
+		FixSearchBtn.cx += 21;
     }
     else                      // 1440*900
     {
-        X = 1200;
+		X = 1200;
         Y = 720;
-        WidthList        += 66;
-        WidthSearchEdit  += 66;
-        FixSearchBtn.cx += 66;
+		WidthList += 66;
+		WidthSearchEdit += 66;
+		FixSearchBtn.cx += 66;
     }
-    CControlUI *pctnPlaylist = m_PaintManager.FindControl(_T("ctnPlaylist"));
+	CControlUI *pctnPlaylist = m_PaintManager.FindControl(_T("ctnPlaylist"));
     CControlUI *peditSearch  = m_PaintManager.FindControl(_T("editSearch"));
     CControlUI *pbtnSearch   = m_PaintManager.FindControl(_T("btnSearch"));
     if (pctnPlaylist && peditSearch && pbtnSearch)
@@ -518,29 +513,23 @@ void CDuiFrameWnd::OpenFileDialog()
 
 void CDuiFrameWnd::AddFile( const std::vector<string_t> &vctString)
 {
-    CTreeNodeUI *pNodeTmp, *pNodePlaylist;
     CDuiString  strTmp;
     TCHAR       szName[_MAX_FNAME];
     TCHAR       szExt[_MAX_EXT];
     unsigned    i, uWantedCount;
-    pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodePlaylist")));
-    if (! pNodePlaylist)
-    {
-        return;
-    }
     for(i = 0, uWantedCount = 0; i < vctString.size(); i++)
     {
         if (WantedFile(vctString[i].c_str()))
         {
             _tsplitpath_s(vctString[i].c_str(), NULL, 0, NULL, 0, szName, _MAX_FNAME, szExt, _MAX_EXT);
-            strTmp.Format(_T("%s%s"), szName, szExt);   // 文件名
+            strTmp.Format(_T("%s%s"), szName, szExt);// 文件名格式重写
             uWantedCount++;
         }
     }
-	Play(strTmp);//第一次打开显示时候不应该加入
+	Play(strTmp);
 }
 
-void CDuiFrameWnd::AddConnectID(LPCTSTR str)
+void CDuiFrameWnd::AddConnectID(LPCTSTR str, int i)
 {
 	CTreeNodeUI *pNodeTmp, *pNodePlaylist;
 	pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodePlaylist")));
@@ -548,17 +537,33 @@ void CDuiFrameWnd::AddConnectID(LPCTSTR str)
 	{
 		return;
 	}
+	LPCTSTR str_num = (LPCTSTR)&i;
 	pNodeTmp = new CTreeNodeUI;
 	pNodeTmp->SetItemTextColor(0xFFC8C6CB);
 	pNodeTmp->SetItemHotTextColor(0xFFC8C6CB);
 	pNodeTmp->SetSelItemTextColor(0xFFC8C6CB);
-	pNodeTmp->SetTag(U_TAG_PLAYLIST);
 	pNodeTmp->SetItemText(str);
+	pNodeTmp->SetName(str_num);
 	pNodeTmp->SetAttribute(_T("height"), _T("22"));
 	pNodeTmp->SetAttribute(_T("inset"), _T("7,0,0,0"));
 	pNodeTmp->SetAttribute(_T("itemattr"), _T("valign=\"vcenter\" font=\"4\""));
 	pNodeTmp->SetAttribute(_T("folderattr"), _T("width=\"0\" float=\"true\""));
 	pNodePlaylist->Add(pNodeTmp);
+}
+
+void CDuiFrameWnd::CloseConnect() 
+{
+	CTreeNodeUI  *pNodePlaylist, *pNodeTemp;
+	pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodePlaylist")));
+	for (int m = 1; m < connect_num; m++) {
+		LPCTSTR str_num = (LPCTSTR)&m;
+		pNodeTemp = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(str_num));
+		pNodePlaylist->Remove(pNodeTemp);
+	}
+	closesocket(serSocket);
+	CControlUI *pbtnGetConnect = m_PaintManager.FindControl(_T("btnGetConnect"));
+	pbtnGetConnect->SetEnabled(-1);
+	connect_num = 1;
 }
 
 void CDuiFrameWnd::Play( bool bPlay )
@@ -668,7 +673,8 @@ LRESULT CDuiFrameWnd::OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam )
 
 LRESULT CDuiFrameWnd::OnAddIP(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-	AddConnectID(address_ip);
+	AddConnectID(address_ip, connect_num);
+	connect_num++;
 	return TRUE;
 }
 

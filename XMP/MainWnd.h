@@ -35,7 +35,8 @@ public:
     void OpenFileDialog();// 打开文件窗口
     void ShowPlaylist(bool bShow);// 显示播放列表
     void AddFile(const std::vector<string_t> &vctString);// 添加文件到播放列表
-	void AddConnectID(LPCTSTR str);// 添加通信连接IP地址
+	void AddConnectID(LPCTSTR str, int i);// 添加通信连接IP地址
+	void CloseConnect();// 关闭通信连接
 
 private:
 	CAVPlayer       m_cAVPlayer;// 播放器类
