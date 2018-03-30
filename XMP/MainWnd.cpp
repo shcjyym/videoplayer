@@ -224,8 +224,8 @@ CControlUI* CDuiFrameWnd::CreateControl( LPCTSTR pstrClassName )
     else if (_tcsicmp(pstrClassName, _T("WndMediaDisplay")) == 0)
     {
         CWndUI *pUI = new CWndUI;   
-        HWND   hWnd = CreateWindow(_T("#32770"), _T("WndMediaDisplay"), WS_VISIBLE | WS_CHILD, 0, 0, 0, 0, m_PaintManager.GetPaintWindow(), (HMENU)0, NULL, NULL);
-        pUI->Attach(hWnd);  
+		HWND   hWnd = CreateWindow(_T("#32770"), _T("WndMediaDisplay"), WS_VISIBLE | WS_CHILD, 0, 0, 0, 0, m_PaintManager.GetPaintWindow(), (HMENU)0, NULL, NULL);
+		pUI->Attach(hWnd);
         return pUI;
     }
 
@@ -277,6 +277,9 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
     }
     else if( msg.pSender->GetName() == _T("btnStop"))
     {
+		char * sendData = "4";
+		int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
         Stop();
     }
 	else if (msg.pSender->GetName() == _T("btnFastBackward"))
@@ -314,6 +317,12 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	{
 		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editURL")));
 		Play(pUI->GetText());
+	}
+	else if (msg.pSender->GetName() == _T("btnAdjust"))
+	{
+		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editATime")));
+		int adjust_time = _ttoi(pUI->GetText());
+		m_cAVPlayer.SetTime(adjust_time);
 	}
 
     __super::OnClick(msg);
@@ -709,19 +718,19 @@ LRESULT CDuiFrameWnd::OnPlaying(HWND hwnd, WPARAM wParam, LPARAM lParam )
 LRESULT CDuiFrameWnd::OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam )
 {
     CDuiString  strTime;
-    struct tm   tmTotal, tmCurrent;
+	struct tm   tmTotal, tmCurrent;
 	TCHAR       szTotal[MAX_PATH], szCurrent[MAX_PATH];
 	//m_cAVPlayer.Refresh();
-    time_t      timeCurrent = m_cAVPlayer.GetTime() / 1000;
+	time_t      timeCurrent = m_cAVPlayer.GetTime() / 1000;
 	time_t      timeTotal = m_cAVPlayer.GetTotalTime() / 1000;
-    gmtime_s(&tmTotal, &timeTotal);
-    gmtime_s(&tmCurrent, &timeCurrent);
-    _tcsftime(szTotal,   MAX_PATH, _T("%X"), &tmTotal);
-    _tcsftime(szCurrent, MAX_PATH, _T("%X"), &tmCurrent);
-    strTime.Format(_T("%s / %s"), szCurrent, szTotal);
+	gmtime_s(&tmTotal, &timeTotal);
+	gmtime_s(&tmCurrent, &timeCurrent);
+	_tcsftime(szTotal, MAX_PATH, _T("%X"), &tmTotal);
+	_tcsftime(szCurrent, MAX_PATH, _T("%X"), &tmCurrent);
+	strTime.Format(_T("%s / %s"), szCurrent, szTotal);
 	m_VideoTime->SetText(strTime);
 	m_Slider->SetValue(m_cAVPlayer.GetPos());
-    return TRUE;
+	return TRUE;
 }
 
 LRESULT CDuiFrameWnd::OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam )

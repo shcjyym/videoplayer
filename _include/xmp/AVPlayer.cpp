@@ -84,6 +84,7 @@ bool CAVPlayer::Play(const std::string &strPath)
         if (m_pVLC_Player = libvlc_media_player_new_from_media(m))
         {
             libvlc_media_player_set_hwnd(m_pVLC_Player, m_hWnd);
+			
             //libvlc_media_player_play(m_pVLC_Player);//取消播放，只初始化播放器的媒体
             // 事件管理
             libvlc_event_manager_t *vlc_evt_man = libvlc_media_player_event_manager(m_pVLC_Player);
@@ -279,16 +280,15 @@ int CAVPlayer::GetVolume()
     return 0;
 }
 
-void CAVPlayer::FirstFrame()
+void CAVPlayer::SetTime(int time)
 {
 	if (m_pVLC_Player)
 	{
-		libvlc_time_t i_time = 0;
-		if (i_time < 0)
+		libvlc_time_t total_time = libvlc_media_player_get_length(m_pVLC_Player);
+		if (time > 0 && time < total_time) 
 		{
-			i_time = 0;
+			libvlc_media_player_set_time(m_pVLC_Player, time);
 		}
-		libvlc_media_player_set_time(m_pVLC_Player, i_time);
 	}
 }
 

@@ -8,5 +8,9 @@
       </TreeNode>
       <TreeNode></TreeNode>
       </TreeView>
+    <HorizontalLayout name="ctnATime" height="30" inset="0, 0, 1, 0">
+      <Edit name="editATime" text="请输入调整时间(ms)" font="3" textpadding="10,0,8,0" bordersize="1" focusbordercolor="#FF154B83" nativebkcolor="#FF0E0E0E" bkcolor="#FF0E0E0E" textcolor="#FF4B4F51" disabledtextcolor="#FFA7A6AA" />
+      <Button name="btnAdjust" width="20" textcolor="#FF000000" disabledtextcolor="#FFA7A66A" align="center" normalimage="file=&apos;btn_refresh.png&apos; source=&apos;0,0,18,18&apos; dest='1,4,19,22' " hotimage="file=&apos;btn_refresh.png&apos; source=&apos;19,0,37,18&apos; dest='1,4,19,22' " pushedimage="file=&apos;btn_refresh.png&apos; source=&apos;38,0,56,18&apos; dest='1,4,19,22' " />
+    </HorizontalLayout>
   </VerticalLayout>
 </Window>
