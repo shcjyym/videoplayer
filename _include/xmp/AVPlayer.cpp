@@ -49,10 +49,35 @@ bool CAVPlayer::Play(const std::string &strPath)
     {
         return false;
     }
+	bool bURL = false;
+	std::vector<std::string> vctURL;
+	// 目前所支持的几种网络url
+	vctURL.push_back("http");
+	vctURL.push_back("https");
+	vctURL.push_back("ftp");
+	vctURL.push_back("rstp");
+	for (unsigned i = 0; i < vctURL.size(); i++)
+	{
+		if (!strPath.compare(0, vctURL[i].size(), vctURL[i]))
+		{
+			bURL = true;
+			break;
+		}
+	}
+
     Stop();
     bool bRet = false;
     libvlc_media_t *m;
-    m = libvlc_media_new_path(m_pVLC_Inst, strPath.c_str());
+
+	// 判断是网络视频还是本地视频，对应不同地址格式
+	if (bURL)
+	{
+		m = libvlc_media_new_location(m_pVLC_Inst, strPath.c_str());
+	}
+	else
+	{
+		m = libvlc_media_new_path(m_pVLC_Inst, strPath.c_str());
+	}
 
     if (m)
     {
@@ -152,9 +177,6 @@ void CAVPlayer::SeekTo(int iPos)
 
 void CAVPlayer::SeekForward()
 {
-    //int iPos = GetPos();
-    //SeekTo((int)ceil(iPos * 1.1));
-    // 一次快退5秒
     if (m_pVLC_Player)
     {
         libvlc_time_t i_time = libvlc_media_player_get_time(m_pVLC_Player) + 5000;
@@ -186,9 +208,6 @@ void CAVPlayer::Refresh()
 
 void CAVPlayer::SeekBackward()
 {
-    //int iPos = GetPos();
-    //SeekTo((int)floor(iPos * 0.9));
-
     if (m_pVLC_Player)
     {
         libvlc_time_t i_time = libvlc_media_player_get_time(m_pVLC_Player) - 5000;

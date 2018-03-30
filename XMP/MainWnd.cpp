@@ -152,7 +152,7 @@ DWORD WINAPI CDuiFrameWnd::ThreadProc(LPVOID lpParameter)
 }
 
 DUI_BEGIN_MESSAGE_MAP(CDuiFrameWnd, CNotifyPump)
-DUI_ON_MSGTYPE(DUI_MSGTYPE_CLICK,OnClick)
+      DUI_ON_MSGTYPE(DUI_MSGTYPE_CLICK,OnClick)
 DUI_END_MESSAGE_MAP()
 
 void CDuiFrameWnd::InitWindow()
@@ -166,19 +166,19 @@ void CDuiFrameWnd::InitWindow()
     ::GetWindowPlacement(*this, &m_OldWndPlacement);
 
     // 初始化CActiveXUI控件
-    std::vector<CDuiString> vctName;
-    CActiveXUI* pActiveXUI;
+	std::vector<CDuiString> vctName;
+	CActiveXUI* pActiveXUI;
+	vctName.push_back(_T("ActiveXWeb"));
+	for (UINT i = 0; i < vctName.size(); i++)
+	{
+		pActiveXUI = static_cast<CActiveXUI*>(m_PaintManager.FindControl(vctName[i]));
 
-    for (UINT i = 0; i < vctName.size(); i++)
-    {
-        pActiveXUI = static_cast<CActiveXUI*>(m_PaintManager.FindControl(vctName[i]));
-
-        if(pActiveXUI) 
-        {
-            pActiveXUI->SetDelayCreate(false);
-            pActiveXUI->CreateControl(CLSID_WebBrowser);
-        }
-    }
+		if (pActiveXUI)
+		{
+			pActiveXUI->SetDelayCreate(false);
+			pActiveXUI->CreateControl(CLSID_WebBrowser);
+		}
+	}
 
     // 几个常用控件做为成员变量
     CSliderUI* pSilderVol = static_cast<CSliderUI*>(m_PaintManager.FindControl(_T("sliderVol")));
@@ -239,11 +239,11 @@ CControlUI* CDuiFrameWnd::CreateControl( LPCTSTR pstrClassName )
 
 void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 {
-    if( msg.pSender->GetName() == _T("btnPlaylistShow") ) 
+    if( msg.pSender->GetName() == _T("btnPlaylistShow"))
     {
         ShowPlaylist(true);
     }
-    else if( msg.pSender->GetName() == _T("btnPlaylistHide") ) 
+    else if( msg.pSender->GetName() == _T("btnPlaylistHide"))
     {
         ShowPlaylist(false);
     }
@@ -261,7 +261,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	{
 		OpenFileDialog();
 	}
-    else if( msg.pSender->GetName() == _T("btnPlay") ) 
+    else if( msg.pSender->GetName() == _T("btnPlay"))
     {
 		char * sendData = "2";
 		int nAddrLen = sizeof(remoteAddr);
@@ -273,18 +273,27 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		char * sendData = "3";
 		int nAddrLen = sizeof(remoteAddr);
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
-
         Play(false);
     }
-    else if( msg.pSender->GetName() == _T("btnStop") ) 
+    else if( msg.pSender->GetName() == _T("btnStop"))
     {
         Stop();
     }
+	else if (msg.pSender->GetName() == _T("btnFastBackward"))
+	{
+		m_cAVPlayer.SeekBackward();
+		::PostMessage(*this, WM_USER_POS_CHANGED, 0, m_cAVPlayer.GetPos());
+	}
+	else if (msg.pSender->GetName() == _T("btnFastForward"))
+	{
+		m_cAVPlayer.SeekForward();
+		::PostMessage(*this, WM_USER_POS_CHANGED, 0, m_cAVPlayer.GetPos());
+	}
 	else if (msg.pSender->GetName() == _T("btnScreenNormal"))
 	{
 		FullScreen(false);
 	}
-    else if( msg.pSender->GetName() == _T("btnScreenFull") ) 
+    else if( msg.pSender->GetName() == _T("btnScreenFull"))
     {
         FullScreen(true);
     }
@@ -300,6 +309,11 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		m_cAVPlayer.Volume(pUI->GetValue());
 		m_PaintManager.FindControl(_T("btnVolume"))->SetVisible(true);
 		msg.pSender->SetVisible(false);
+	}
+	else if (msg.pSender->GetName() == _T("btnRefresh"))
+	{
+		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editURL")));
+		Play(pUI->GetText());
 	}
 
     __super::OnClick(msg);
@@ -317,6 +331,52 @@ void CDuiFrameWnd::Notify( TNotifyUI& msg )
 			}
 		}
     }
+	else if (msg.sType == DUI_MSGTYPE_SELECTCHANGED)
+	{
+		CDuiString    strName = msg.pSender->GetName();
+		CTabLayoutUI* pTab = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("tabCaption")));
+		std::vector<CDuiString> vctString;
+		vctString.push_back(_T("tabClient"));
+		vctString.push_back(_T("tabWeb"));
+		std::vector<CDuiString>::iterator it = std::find(vctString.begin(), vctString.end(), strName);
+		if (vctString.end() != it)
+		{
+			int iIndex = it - vctString.begin();
+			pTab->SelectItem(iIndex);
+			if (iIndex == 0)
+			{
+				Stop();// 切回调整为初始状态，视频停止播放
+			}
+			if (iIndex > 0)
+			{
+				std::vector<CDuiString> vctName, vctURL;
+				CActiveXUI* pActiveXUI;
+				vctName.push_back(_T("ActiveXWeb"));
+				vctURL.push_back(_T("http://www.baidu.com"));
+				iIndex--;
+				pActiveXUI = static_cast<CActiveXUI*>(m_PaintManager.FindControl(vctName[iIndex]));
+
+				if (pActiveXUI)
+				{
+					IWebBrowser2* pWebBrowser = NULL;
+					pActiveXUI->GetControl(IID_IWebBrowser2, (void**)&pWebBrowser);
+					if (pWebBrowser)
+					{
+						_bstr_t bstrTmp;
+						BSTR    bstr;
+						pWebBrowser->get_LocationURL(&bstr);
+						bstrTmp.Attach(bstr);
+
+						if (!bstrTmp.length())
+						{
+							pWebBrowser->Navigate(_bstr_t(vctURL[iIndex]), NULL, NULL, NULL, NULL);
+							
+						}
+					}
+				}
+			}
+		}
+	}
     __super::Notify(msg);
 }
 
@@ -367,17 +427,18 @@ void CDuiFrameWnd::AdaptWindowSize( UINT cxScreen )
 	int X = 968, Y = 600;
 	int WidthList = 236, WidthSearchEdit = 193;
 	SIZE FixSearchBtn = { 201, 0 };
-    if(cxScreen <= 1024)      // 800*600  1024*768  
+	// 根据电脑显示设备的屏宽调整客户端显示画幅大小
+    if(cxScreen <= 1024)
     {
         X = 765;
         Y = 460;
     } 
-    else if(cxScreen <= 1280) // 1152*864  1280*800  1280*960  1280*1024
+    else if(cxScreen <= 1280)
     {
         X = 968;
         Y = 600;
     }
-    else if(cxScreen <= 1366) // 1360*768 1366*768
+    else if(cxScreen <= 1366)
     {
         X = 1028;
         Y = 626;
@@ -385,8 +446,8 @@ void CDuiFrameWnd::AdaptWindowSize( UINT cxScreen )
 		WidthSearchEdit += 21;
 		FixSearchBtn.cx += 21;
     }
-    else                      // 1440*900
-    {
+    else
+	{
 		X = 1200;
         Y = 720;
 		WidthList += 66;
@@ -394,13 +455,9 @@ void CDuiFrameWnd::AdaptWindowSize( UINT cxScreen )
 		FixSearchBtn.cx += 66;
     }
 	CControlUI *pctnPlaylist = m_PaintManager.FindControl(_T("ctnPlaylist"));
-    CControlUI *peditSearch  = m_PaintManager.FindControl(_T("editSearch"));
-    CControlUI *pbtnSearch   = m_PaintManager.FindControl(_T("btnSearch"));
-    if (pctnPlaylist && peditSearch && pbtnSearch)
+    if (pctnPlaylist)
     {
 		pctnPlaylist->SetFixedWidth(WidthList);
-		peditSearch->SetFixedWidth(WidthSearchEdit);
-		pbtnSearch->SetFixedXY(FixSearchBtn);
     }
 	::SetWindowPos(m_PaintManager.GetPaintWindow(), NULL, 0, 0, X, Y, SWP_FRAMECHANGED | SWP_NOZORDER | SWP_NOACTIVATE);
 	CenterWindow();
@@ -451,13 +508,15 @@ void CDuiFrameWnd::ShowPlayWnd( bool bShow )
     CControlUI *pbtnScreen  = m_PaintManager.FindControl(_T("btnScreenFull"));
     CControlUI *pctnClient  = m_PaintManager.FindControl(_T("ctnClient"));
     CControlUI *pctnSlider  = m_PaintManager.FindControl(_T("ctnSlider"));
+	CControlUI *pctnURL = m_PaintManager.FindControl(_T("ctnURL"));
 
-    if (pbtnWnd && pbtnStop && pbtnScreen && pctnClient  && pctnSlider)
+	if (pbtnWnd && pbtnStop && pbtnScreen && pctnClient  && pctnSlider && pctnURL)
     {
         pbtnStop->SetEnabled(bShow);
         pbtnScreen->SetEnabled(bShow);
         pctnClient->SetVisible(! bShow);
         pctnSlider->SetVisible(bShow);
+		pctnURL->SetVisible(!bShow);
         // 打开文件时
         if (bShow)
         {
