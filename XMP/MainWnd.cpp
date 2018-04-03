@@ -157,22 +157,22 @@ DUI_END_MESSAGE_MAP()
 
 void CDuiFrameWnd::InitWindow()
 {
-    SetIcon(IDI_ICON1);
-    // 根据分辨率自动调节窗口大小
-    MONITORINFO Monitor = {};
-	Monitor.cbSize = sizeof(Monitor);
-    ::GetMonitorInfo(::MonitorFromWindow(*this, MONITOR_DEFAULTTONEAREST), &Monitor);
-    AdaptWindowSize(Monitor.rcMonitor.right - Monitor.rcMonitor.left);
-    ::GetWindowPlacement(*this, &m_OldWndPlacement);
+	SetIcon(IDI_ICON1);
 
-    // 初始化CActiveXUI控件
+	// 根据分辨率自动调节窗口大小
+	MONITORINFO Monitor = {};
+	Monitor.cbSize = sizeof(Monitor);
+	::GetMonitorInfo(::MonitorFromWindow(*this, MONITOR_DEFAULTTONEAREST), &Monitor);
+	AdaptWindowSize(Monitor.rcMonitor.right - Monitor.rcMonitor.left);
+	::GetWindowPlacement(*this, &m_OldWndPlacement);
+
+	// 初始化CActiveXUI控件
 	std::vector<CDuiString> vctName;
 	CActiveXUI* pActiveXUI;
 	vctName.push_back(_T("ActiveXWeb"));
 	for (UINT i = 0; i < vctName.size(); i++)
 	{
 		pActiveXUI = static_cast<CActiveXUI*>(m_PaintManager.FindControl(vctName[i]));
-
 		if (pActiveXUI)
 		{
 			pActiveXUI->SetDelayCreate(false);
@@ -180,29 +180,29 @@ void CDuiFrameWnd::InitWindow()
 		}
 	}
 
-    // 几个常用控件做为成员变量
-    CSliderUI* pSilderVol = static_cast<CSliderUI*>(m_PaintManager.FindControl(_T("sliderVol")));
-    m_Slider = static_cast<CSliderUI*>(m_PaintManager.FindControl(_T("sliderPlay")));
+	// 几个常用控件做为成员变量
+	CSliderUI* pSilderVol = static_cast<CSliderUI*>(m_PaintManager.FindControl(_T("sliderVol")));
+	m_Slider = static_cast<CSliderUI*>(m_PaintManager.FindControl(_T("sliderPlay")));
 	m_VideoTime = static_cast<CLabelUI*>(m_PaintManager.FindControl(_T("labelPlayTime")));
 
-    if (! pSilderVol || !m_Slider || !m_VideoTime)
-    {
-        return;
-    }
+	if (!pSilderVol || !m_Slider || !m_VideoTime)
+	{
+		return;
+	}
 
 	pSilderVol->OnNotify += MakeDelegate(this, &CDuiFrameWnd::OnVolumeChanged);
 	m_Slider->OnNotify += MakeDelegate(this, &CDuiFrameWnd::OnPosChanged);
 
-    // 设置播放器的窗口句柄和回调函数
-    CWndUI *pWnd = static_cast<CWndUI*>(m_PaintManager.FindControl(_T("wndMedia")));
-    if (pWnd)
-    {
-        m_cAVPlayer.SetHWND(pWnd->GetHWND()); 
-        m_cAVPlayer.SetCbPlaying(CbPlaying);
-        m_cAVPlayer.SetCbPosChanged(CbPosChanged);
-        m_cAVPlayer.SetCbEndReached(CbEndReached);
-    }
-	m_cAVPlayer.Play("test1.avi");//添加此处预加载通信部分 ??? 有待改正 ???
+	// 设置播放器的窗口句柄和回调函数
+	CWndUI *pWnd = static_cast<CWndUI*>(m_PaintManager.FindControl(_T("wndMedia")));
+	if (pWnd)
+	{
+		m_cAVPlayer.SetHWND(pWnd->GetHWND());
+		m_cAVPlayer.SetCbPlaying(CbPlaying);
+		m_cAVPlayer.SetCbPosChanged(CbPosChanged);
+		m_cAVPlayer.SetCbEndReached(CbEndReached);
+	}
+	m_cAVPlayer.Play("test1.avi");//添加此处以加载通信部分需要的dll文件。不添加的结果是无法在播放视频前建立通信，此处需要修正
 }
 
 CControlUI* CDuiFrameWnd::CreateControl( LPCTSTR pstrClassName )
@@ -223,10 +223,10 @@ CControlUI* CDuiFrameWnd::CreateControl( LPCTSTR pstrClassName )
     }
     else if (_tcsicmp(pstrClassName, _T("WndMediaDisplay")) == 0)
     {
-        CWndUI *pUI = new CWndUI;   
+		CWndUI *pUI = new CWndUI;
 		HWND   hWnd = CreateWindow(_T("#32770"), _T("WndMediaDisplay"), WS_VISIBLE | WS_CHILD, 0, 0, 0, 0, m_PaintManager.GetPaintWindow(), (HMENU)0, NULL, NULL);
 		pUI->Attach(hWnd);
-        return pUI;
+		return pUI;
     }
 
     if (!XML.IsEmpty())
@@ -322,6 +322,10 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	{
 		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editATime")));
 		int adjust_time = _ttoi(pUI->GetText());
+		char sendData[10];
+		itoa(adjust_time, sendData, 10);
+		int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
 		m_cAVPlayer.SetTime(adjust_time);
 	}
 
