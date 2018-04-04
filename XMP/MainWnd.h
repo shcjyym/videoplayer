@@ -11,17 +11,18 @@ public:
     ~CDuiFrameWnd();
 
     DUI_DECLARE_MESSAGE_MAP()
-    virtual void InitWindow();
-	static DWORD WINAPI ThreadProc(LPVOID lpParameter);
-    virtual CControlUI* CreateControl(LPCTSTR pstrClassName);
-    virtual void Notify(TNotifyUI& msg);
+    virtual void InitWindow();//
+	static DWORD WINAPI CmuThreadProc(LPVOID lpParameter);// 与设备端通信函数
+	static DWORD WINAPI SynThread(LPVOID lpParameter);// 与设备端同步函数
+    virtual CControlUI* CreateControl(LPCTSTR pstrClassName);// 加载其余XML控件信息
+    virtual void Notify(TNotifyUI& msg);//
     virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-    virtual void OnClick(TNotifyUI& msg);
-    virtual LRESULT OnNcHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-    virtual LRESULT ResponseDefaultKeyEvent(WPARAM wParam); 
+    virtual void OnClick(TNotifyUI& msg);// 单击控件响应
+    virtual LRESULT OnNcHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);// 鼠标响应
+    virtual LRESULT ResponseDefaultKeyEvent(WPARAM wParam);// 键盘响应
 
-    void OnDisplayChange(HWND hwnd, UINT bitsPerPixel, UINT cxScreen, UINT cyScreen);
-    void OnGetMinMaxInfo(HWND hwnd, LPMINMAXINFO lpMinMaxInfo);
+    void OnDisplayChange(HWND hwnd, UINT bitsPerPixel, UINT cxScreen, UINT cyScreen);//
+    void OnGetMinMaxInfo(HWND hwnd, LPMINMAXINFO lpMinMaxInfo);//
     LRESULT OnPlaying(HWND hwnd, WPARAM wParam, LPARAM lParam);// 文件头读取完毕，开始播放
     LRESULT OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam);// 进度改变，播放器传回来的进度
     LRESULT OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam);// 文件播放完毕
@@ -45,7 +46,8 @@ private:
     CLabelUI        *m_VideoTime;// 文件播放时间
     WINDOWPLACEMENT m_OldWndPlacement;// 保存窗口原来的位置
     bool            m_FullScreen;// 是否在全屏模式
-	HANDLE      hThread;
+	HANDLE      hThread_Communication;// 通信线程句柄
+	HANDLE      hThread_Synchronize;// 同步线程句柄
     void ShowPlayButton(bool bShow);// 显示播放按钮
     void ShowPlayWnd(bool bShow);// 显示播放窗口
 	void ShowConnectButton(bool bShow);// 显示通信连接按钮

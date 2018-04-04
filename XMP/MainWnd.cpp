@@ -119,7 +119,7 @@ sockaddr_in remoteAddr; // 远程控制客户端地址
 CDuiString address_ip; // 列表中显示内容
 char recvData[255]; // 获取的数据内容
 int connect_num=1;// 连接数目
-DWORD WINAPI CDuiFrameWnd::ThreadProc(LPVOID lpParameter)
+DWORD WINAPI CDuiFrameWnd::CmuThreadProc(LPVOID lpParameter)
 {
 	CDuiFrameWnd* pDlg;
 	pDlg = (CDuiFrameWnd*)lpParameter;
@@ -149,6 +149,17 @@ DWORD WINAPI CDuiFrameWnd::ThreadProc(LPVOID lpParameter)
 	}
 	//closesocket(serSocket);//单击连接后按钮禁灰，不关闭套接字
 	return 0;
+}
+
+DWORD WINAPI CDuiFrameWnd::SynThread(LPVOID lpParameter)
+{
+	while (1)
+	{
+		Sleep(1000);
+		char *temp = "88";
+		int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, temp, strlen(temp), 0, (sockaddr *)&remoteAddr, nAddrLen);
+	}
 }
 
 DUI_BEGIN_MESSAGE_MAP(CDuiFrameWnd, CNotifyPump)
@@ -251,7 +262,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	{
 		CControlUI *pbtnGetConnect = m_PaintManager.FindControl(_T("btnGetConnect"));
 		pbtnGetConnect->SetEnabled(0);
-		hThread = ::CreateThread(NULL, 0, ThreadProc, this, 0, NULL);
+		hThread_Communication = ::CreateThread(NULL, 0, CmuThreadProc, this, 0, NULL);
 	}
 	else if (msg.pSender->GetName() == _T("btnCloseConnect"))
 	{
@@ -266,6 +277,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		char * sendData = "2";
 		int nAddrLen = sizeof(remoteAddr);
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
+		hThread_Synchronize = ::CreateThread(NULL, 0, SynThread, this, 0, NULL);
         Play(true);
     }
     else if( msg.pSender->GetName() == _T("btnPause") ) 
