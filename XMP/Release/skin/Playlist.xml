@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <Window size="236,480">
-    <VerticalLayout name="ctnPlaylist" bkcolor="#FF111111" width="300">
-		<TreeView name="treePlaylist" childpadding="4" multipleitem="true" inset="4,0,3,0" bordersize="1" bordercolor="#FF2B2B2B" itemtextcolor="#FFC8C6CB" itemhottextcolor="#FFC8C6CB" selitemtextcolor="#FFC8C6CB" itemhotbkcolor="#FF1B1B1B" itemselectedbkcolor="#FF151C2C" vscrollbar="true" hscrollbar="true" >
-			<TreeNode name="nodePlaylist" text="节点列表" height="30" bkimage="treeview_header_expand.png" itemattr="valign=&quot;vcenter&quot; font=&quot;1&quot; textpadding=&quot;12,0,0,0&quot;" folderattr="width=&quot;0&quot; float=&quot;true&quot;">
-    			<TreeNode height="25" folderattr="width=&quot;0&quot; float=&quot;true&quot;">
-				</TreeNode>
-			</TreeNode>
-		</TreeView>
-    </VerticalLayout>
+  <VerticalLayout name="ctnPlaylist" bkcolor="#FF111111" width="300">
+    <TreeView name="treePlaylist" childpadding="4" multipleitem="true" inset="4,0,3,0" bordersize="1" bordercolor="#FF2B2B2B" itemtextcolor="#FFC8C6CB" itemhottextcolor="#FFC8C6CB" selitemtextcolor="#FFC8C6CB" itemhotbkcolor="#FF1B1B1B" itemselectedbkcolor="#FF151C2C" vscrollbar="true" hscrollbar="true" >
+      <TreeNode name="nodePlaylist" text="节点列表" height="30" bkimage="treeview_header_expand.png" itemattr="valign=&quot;vcenter&quot; font=&quot;1&quot; textpadding=&quot;12,0,0,0&quot;" folderattr="width=&quot;0&quot; float=&quot;true&quot;">
+      <TreeNode text="所有已连接IP" inset="35,0,0,0" height="22" itemattr="valign=&quot;vcenter&quot; font=&quot;1&quot; textpadding=&quot;6,0,0,0&quot;">
+    	</TreeNode>
+      </TreeNode>
+      <TreeNode></TreeNode>
+      </TreeView>
+    <HorizontalLayout name="ctnATime" height="30" inset="0, 0, 1, 0">
+      <Edit name="editATime" text="请输入调整时间(ms)" font="3" textpadding="10,0,8,0" bordersize="1" focusbordercolor="#FF154B83" nativebkcolor="#FF0E0E0E" bkcolor="#FF0E0E0E" textcolor="#FF4B4F51" disabledtextcolor="#FFA7A6AA" />
+      <Button name="btnAdjust" width="20" textcolor="#FF000000" disabledtextcolor="#FFA7A66A" align="center" normalimage="file=&apos;btn_refresh.png&apos; source=&apos;0,0,18,18&apos; dest='1,4,19,22' " hotimage="file=&apos;btn_refresh.png&apos; source=&apos;19,0,37,18&apos; dest='1,4,19,22' " pushedimage="file=&apos;btn_refresh.png&apos; source=&apos;38,0,56,18&apos; dest='1,4,19,22' " />
+    </HorizontalLayout>
+  </VerticalLayout>
 </Window>

@@ -29,7 +29,7 @@ public:
     void SeekTo(int iPos);// 跳到指定位置iPos
     void SeekForward();// 快进
     void SeekBackward();// 快退
-	void Refresh();// 刷新
+	void Refresh();// 刷新（此功能暂未使用）
 	void SetTime(int time);// 设置时间
 
     void SetHWND(HWND hwnd);// 设置视频显示的窗口句柄
@@ -42,9 +42,9 @@ public:
     __int64 GetTime();// 获取时间
     int     GetVolume();// 获取音量
 
-    void SetCbPlaying(pfnCallback pfn);// 设置文件头读取完毕时的回调函数
-    void SetCbPosChanged(pfnCallback pfn);// 设置文件位置改变时的回调函数
-    void SetCbEndReached(pfnCallback pfn);// 设置文件头读取完毕时的回调函数
+    void SetCbPlaying(pfnCallback pfn);// 设置文件头读取完毕时的回调
+    void SetCbPosChanged(pfnCallback pfn);// 设置文件位置改变时的回调
+    void SetCbEndReached(pfnCallback pfn);// 设置文件头读取完毕时的回调
 
 private:
     libvlc_instance_t       *m_pVLC_Inst;// VLC实例

@@ -328,7 +328,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
 		m_cAVPlayer.SetTime(adjust_time);
 	}
-
+	
     __super::OnClick(msg);
 }
 
