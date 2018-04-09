@@ -15,18 +15,19 @@ public:
 	static DWORD WINAPI CmuThreadProc(LPVOID lpParameter);// 与设备端通信函数
 	static DWORD WINAPI SynThread(LPVOID lpParameter);// 与设备端同步函数
     virtual CControlUI* CreateControl(LPCTSTR pstrClassName);// 加载其余XML控件信息
-    virtual void Notify(TNotifyUI& msg);//
+    virtual void Notify(TNotifyUI& msg);
     virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
     virtual void OnClick(TNotifyUI& msg);// 单击控件响应
     virtual LRESULT OnNcHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);// 鼠标响应
     virtual LRESULT ResponseDefaultKeyEvent(WPARAM wParam);// 键盘响应
 
-    void OnDisplayChange(HWND hwnd, UINT bitsPerPixel, UINT cxScreen, UINT cyScreen);//
-    void OnGetMinMaxInfo(HWND hwnd, LPMINMAXINFO lpMinMaxInfo);//
+    void OnDisplayChange(HWND hwnd, UINT bitsPerPixel, UINT cxScreen, UINT cyScreen);// 显示发生变化
+    void OnGetMinMaxInfo(HWND hwnd, LPMINMAXINFO lpMinMaxInfo);// 获取窗口大小信息
     LRESULT OnPlaying(HWND hwnd, WPARAM wParam, LPARAM lParam);// 文件头读取完毕，开始播放
     LRESULT OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam);// 进度改变，播放器传回来的进度
     LRESULT OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam);// 文件播放完毕
 	LRESULT OnAddIP(HWND hwnd, WPARAM wParam, LPARAM lParam);// 添加IP信息
+	LRESULT OnSynTime(HWND hwnd, WPARAM wParam, LPARAM lParam);// 同步时间
     bool    OnPosChanged(void* param);// 进度改变，用户主动改变进度
     bool    OnVolumeChanged(void* param);// 音量改变
 
@@ -35,7 +36,7 @@ public:
     void Stop();// 停止
     void OpenFileDialog();// 打开文件窗口
     void ShowPlaylist(bool bShow);// 显示播放列表
-    void AddFile(const std::vector<string_t> &vctString);// 添加文件到播放列表
+    void AddFile(const std::vector<string_t> &vctString, bool bInit = false);// 添加文件到播放列表
 	void AddConnectID(LPCTSTR str, int i);// 添加通信连接IP地址
 	void CloseConnect();// 关闭通信连接
 
@@ -44,6 +45,7 @@ private:
     CDuiString      m_strPath;// 当前文件的路径
     CSliderUI       *m_Slider;// 文件播放进度
     CLabelUI        *m_VideoTime;// 文件播放时间
+	CPlaylist         m_cPlayList;        // 存储播放列表的路径
     WINDOWPLACEMENT m_OldWndPlacement;// 保存窗口原来的位置
     bool            m_FullScreen;// 是否在全屏模式
 	HANDLE      hThread_Communication;// 通信线程句柄
@@ -55,4 +57,8 @@ private:
 
     void AdaptWindowSize(UINT cxScreen);// 根据屏幕分辨率自动调整窗口大小
     void FullScreen(bool bFull);// 全屏
+	void GetPlaylistInfo(int &iIndexTreeStart, int &iFileCount);// 获取播放列表在Tree控件中的起始位置、文件数量
+	int m_iPlaylistIndex;// 辅助标记
+	int  GetPlaylistIndex(int iIndexTree); // Tree控件的Playlist下标
+	int circle_time = 1;// 播放循环次数
 };

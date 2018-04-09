@@ -84,7 +84,6 @@ bool CAVPlayer::Play(const std::string &strPath)
         if (m_pVLC_Player = libvlc_media_player_new_from_media(m))
         {
             libvlc_media_player_set_hwnd(m_pVLC_Player, m_hWnd);
-			
             //libvlc_media_player_play(m_pVLC_Player);//取消播放，只初始化播放器的媒体
             // 事件管理
             libvlc_event_manager_t *vlc_evt_man = libvlc_media_player_event_manager(m_pVLC_Player);
