@@ -4,6 +4,14 @@
 #include "../_include/xmp/AVPlayer.h"
 #include "PlayList.h"
 
+//播放模式定义
+enum PlayMode
+{
+	EM_PLAY_MODE_QUEUE,
+	EM_PLAY_MODE_RANDOM,        
+	EM_PLAY_MODE_SINGLE_LISTCIRCLE
+};
+
 class CDuiFrameWnd: public CXMLWnd
 {
 public:
@@ -39,6 +47,7 @@ public:
     void AddFile(const std::vector<string_t> &vctString, bool bInit = false);// 添加文件到播放列表
 	void AddConnectID(LPCTSTR str, int i);// 添加通信连接IP地址
 	void CloseConnect();// 关闭通信连接
+	CDuiString GetNextPath(bool bNext);// 获取下一个播放路径，bNext为true代表下一个，为false代表上一个
 
 private:
 	CAVPlayer       m_cAVPlayer;// 播放器类
@@ -58,7 +67,10 @@ private:
     void AdaptWindowSize(UINT cxScreen);// 根据屏幕分辨率自动调整窗口大小
     void FullScreen(bool bFull);// 全屏
 	void GetPlaylistInfo(int &iIndexTreeStart, int &iFileCount);// 获取播放列表在Tree控件中的起始位置、文件数量
-	int m_iPlaylistIndex;// 辅助标记
+	int m_playlistIndex;// 辅助标记
 	int  GetPlaylistIndex(int iIndexTree); // Tree控件的Playlist下标
+	PlayMode   m_playMode;// 播放模式选择号
+	std::deque<unsigned>   m_rand;// 随机播放序号
 	int circle_time = 1;// 播放循环次数
+	int during_time;// 播放持续时间
 };

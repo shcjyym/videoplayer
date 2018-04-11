@@ -42,9 +42,9 @@ public:
     __int64 GetTime();// 获取时间
     int     GetVolume();// 获取音量
 
-    void SetCbPlaying(pfnCallback pfn);// 设置文件头读取完毕时的回调
-    void SetCbPosChanged(pfnCallback pfn);// 设置文件位置改变时的回调
-    void SetCbEndReached(pfnCallback pfn);// 设置文件头读取完毕时的回调
+    void SetCbPlaying(pfnCallback pfn);// 文件头读取完毕时的回调
+    void SetCbPosChanged(pfnCallback pfn);// 文件位置改变时的回调
+    void SetCbEndReached(pfnCallback pfn);// 文件头读取完毕时的回调
 
 private:
     libvlc_instance_t       *m_pVLC_Inst;// VLC实例

@@ -17,8 +17,8 @@ const UINT_PTR TAG = 1;
 #define WM_USER_PLAYING               WM_USER + 1// 开始播放文件
 #define WM_USER_POS_CHANGED    WM_USER + 2// 文件播放位置改变
 #define WM_USER_END_REACHED     WM_USER + 3// 播放完毕
-#define WM_USER_ADD_IP                 WM_USER + 4// 加入设备IP地址
-#define WM_USER_SYN_TIME             WM_USER + 5
+#define WM_USER_ADD_IP                 WM_USER + 4// 通信连接后显示设备IP地址
+#define WM_USER_SYN_TIME             WM_USER + 5// 同步时间数据反馈
 
 //文件类型
 const TCHAR STR_FILE_FILTER[] =
@@ -106,10 +106,28 @@ void CbEndReached(void *data)
 	CbPlayer(data, WM_USER_END_REACHED);
 }
 
+// 产生随机播放序列
+void Rand(std::deque<unsigned int> &queRand, unsigned int uRandNum)
+{
+	unsigned Old = queRand.size();
+	unsigned New = Old + uRandNum;
+	queRand.resize(New);
+	for (unsigned i = Old; i < New; i++)
+	{
+		queRand[i] = i;
+	}
+	for (unsigned i = Old; i < New; i++)
+	{
+		std::swap(queRand[i], queRand[rand() % New]);
+	}
+}
+
 CDuiFrameWnd::CDuiFrameWnd( LPCTSTR pszXMLName )
 : CXMLWnd(pszXMLName),
 m_Slider(NULL),
-m_FullScreen(FALSE)
+m_FullScreen(FALSE),
+m_playlistIndex(-1),
+m_playMode(EM_PLAY_MODE_RANDOM)
 {
 }
 
@@ -173,6 +191,7 @@ DWORD WINAPI CDuiFrameWnd::SynThread(LPVOID lpParameter)
 	return 0;
 }
 
+
 DUI_BEGIN_MESSAGE_MAP(CDuiFrameWnd, CNotifyPump)
       DUI_ON_MSGTYPE(DUI_MSGTYPE_CLICK,OnClick)
 DUI_END_MESSAGE_MAP()
@@ -229,6 +248,7 @@ void CDuiFrameWnd::InitWindow()
 	pbtnCloseConnect->SetEnabled(0);// 初始化关闭连接按钮
 
 	m_cAVPlayer.Play("test1.avi");//添加此处以加载通信部分需要的dll文件。不添加的结果是无法在播放视频前建立通信，此处需要修正
+	Stop();
 }
 
 CControlUI* CDuiFrameWnd::CreateControl( LPCTSTR pstrClassName )
@@ -289,6 +309,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	}
 	else if (msg.pSender->GetName() == _T("btnOpen") || msg.pSender->GetName() == _T("btnOpenMini"))
 	{
+		Stop();
 		OpenFileDialog();
 	}
     else if( msg.pSender->GetName() == _T("btnPlay"))
@@ -358,12 +379,36 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
 		m_cAVPlayer.SetTime(adjust_time);
 	}
-	else if (msg.pSender->GetName() == _T("btnCirclePlay"))
+	else if (msg.pSender->GetName() == _T("btnSetOk"))
 	{
-		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editCirclePlay")));
-		circle_time = _ttoi(pUI->GetText());
+		CEditUI* pUI1 = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editCirclePlay")));
+		CEditUI* pUI2 = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editPlayDTime")));
+		circle_time = _ttoi(pUI1->GetText());
+		during_time = _ttoi(pUI2->GetText());
 	}
-	
+	else if (msg.pSender->GetName() == _T("btnPlayMode"))
+	{
+		CMenuWnd *pMenu = new CMenuWnd(_T("menu.xml"));
+		POINT    pt = { msg.ptMouse.x, msg.ptMouse.y };
+		CDuiRect rc = msg.pSender->GetPos();
+		pt.x = rc.left;
+		pt.y = rc.bottom;
+		pMenu->Init(&m_PaintManager, pt);
+		pMenu->ShowWindow(TRUE);
+	}
+	else if (msg.pSender->GetName() == _T("btnAddPlaylist"))
+	{
+		OpenFileDialog();
+	}
+	else if (msg.pSender->GetName() == _T("btnDeletePlaylist"))
+	{
+		CTreeNodeUI  *pNodePlaylist, *pNodeTemp;
+		pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodePlaylist")));
+	    pNodeTemp = pNodePlaylist->GetChildNode(m_playlistIndex-1);
+	    pNodePlaylist->Remove(pNodeTemp);
+		m_cPlayList.Delete(m_playlistIndex-2);
+	}
+
     __super::OnClick(msg);
 }
 
@@ -374,9 +419,27 @@ void CDuiFrameWnd::Notify( TNotifyUI& msg )
 		CTreeViewUI* pTree = static_cast<CTreeViewUI*>(m_PaintManager.FindControl(_T("treePlaylist")));
 		if (pTree && -1 != pTree->GetItemIndex(msg.pSender) && TAG == msg.pSender->GetTag())
 		{
-			m_iPlaylistIndex = pTree->GetItemIndex(msg.pSender);
-			Play(m_cPlayList.GetPlaylist(GetPlaylistIndex(m_iPlaylistIndex)).c_str());
-			Play(true);
+			Stop();
+			m_playlistIndex = pTree->GetItemIndex(msg.pSender);
+			Play(m_cPlayList.GetPlaylist(GetPlaylistIndex(m_playlistIndex)).c_str());
+		}
+	}
+	else if (msg.sType == DUI_MSGTYPE_ITEMCLICK)
+	{
+		CDuiString strName = msg.pSender->GetName();
+		CTreeViewUI* pTree = static_cast<CTreeViewUI*>(m_PaintManager.FindControl(_T("treePlaylist")));
+		m_playlistIndex = pTree->GetItemIndex(msg.pSender);
+		if (strName == _T("menuSingleCircle"))
+		{
+			m_playMode = EM_PLAY_MODE_SINGLE_LISTCIRCLE;
+		}  
+		else if (strName == _T("menuSequence"))
+		{
+			m_playMode = EM_PLAY_MODE_QUEUE;
+		}
+		else if (strName == _T("menuRandom"))
+		{
+			m_playMode = EM_PLAY_MODE_RANDOM;
 		}
 	}
 	else if( msg.sType == DUI_MSGTYPE_DBCLICK)
@@ -604,7 +667,6 @@ void CDuiFrameWnd::ShowControlsForPlay( bool bShow )
 {
 	m_VideoTime->SetText(_T(""));
     ShowPlayWnd(bShow);
-    ShowPlaylist(! bShow);
 }
 
 void CDuiFrameWnd::OpenFileDialog()
@@ -661,7 +723,6 @@ void CDuiFrameWnd::AddFile( const std::vector<string_t> &vctString, bool bInit)
 			}
         }
     }
-	Play(strTmp);
 }
 
 void CDuiFrameWnd::AddConnectID(LPCTSTR str, int i)
@@ -689,7 +750,7 @@ void CDuiFrameWnd::AddConnectID(LPCTSTR str, int i)
 void CDuiFrameWnd::CloseConnect() 
 {
 	CTreeNodeUI  *pNodePlaylist, *pNodeTemp;
-	pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodePlaylist")));
+	pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodeConnectlist")));
 	for (int m = 1; m < connect_num; m++) {
 		LPCTSTR str_num = (LPCTSTR)&m;
 		pNodeTemp = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(str_num));
@@ -790,7 +851,6 @@ LRESULT CDuiFrameWnd::OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam )
     CDuiString  strTime;
 	struct tm   tmTotal, tmCurrent;
 	TCHAR       szTotal[MAX_PATH], szCurrent[MAX_PATH];
-	//m_cAVPlayer.Refresh();
 	time_t      timeCurrent = m_cAVPlayer.GetTime() / 1000;
 	time_t      timeTotal = m_cAVPlayer.GetTotalTime() / 1000;
 	gmtime_s(&tmTotal, &timeTotal);
@@ -801,12 +861,24 @@ LRESULT CDuiFrameWnd::OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam )
 	synTime = m_cAVPlayer.GetTime();
 	m_VideoTime->SetText(strTime);
 	m_Slider->SetValue(m_cAVPlayer.GetPos());
+	if (synTime > during_time&&during_time > 0)// 消息传回过程中加入过多判断可能负荷过大
+	{
+		if (circle_time > 1)
+		{
+			m_cAVPlayer.SeekTo(0);
+			circle_time--;
+		}
+		else 
+		{
+			Stop();
+		}
+	}
 	return TRUE;
 }
 
 LRESULT CDuiFrameWnd::OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam )
 {
-	if (circle_time > 1) 
+	if (circle_time > 1)
 	{
 		Play(m_strPath);
 		Play(true);
@@ -815,7 +887,8 @@ LRESULT CDuiFrameWnd::OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam )
 	}
 	else
 	{
-		Stop();
+		Play(GetNextPath(true));
+		Play(true);
 		return TRUE;
 	}
 }
@@ -839,7 +912,7 @@ bool CDuiFrameWnd::OnPosChanged(void* param)
 
 	if (pMsg->sType == _T("valuechanged"))
 	{
-		m_cAVPlayer.SeekTo((static_cast<CSliderUI*>(pMsg->pSender))->GetValue() + 1); // 获取的值少了1，导致设置的值也少了1，所以这里+1
+		m_cAVPlayer.SeekTo((static_cast<CSliderUI*>(pMsg->pSender))->GetValue() + 1); // 获取的值少了1，导致设置的值也少了1
 	}
 
 	return true;
@@ -896,4 +969,62 @@ void CDuiFrameWnd::GetPlaylistInfo(int &iIndexTreeStart, int &iFileCount)
 		iIndexTreeStart = pTree->GetItemIndex(pNodeTmp);
 		iFileCount = iNodeTotal - i;
 	}
+}
+
+DuiLib::CDuiString CDuiFrameWnd::GetNextPath(bool bNext)
+{
+	int NodeStart = -1;
+	int FileCount = 0;
+	int IndexPlay = m_playlistIndex;
+	GetPlaylistInfo(NodeStart, FileCount);
+
+	if (FileCount <= 0)
+	{
+		return _T("");
+	}
+
+	if (-1 == IndexPlay)
+	{
+		IndexPlay = NodeStart;
+	}
+
+	if (EM_PLAY_MODE_RANDOM == m_playMode)
+	{
+		if (!m_rand.size())
+		{
+			Rand(m_rand, FileCount);
+		}
+
+		IndexPlay = NodeStart + m_rand.front();
+		m_rand.pop_front();
+	}
+	else if (EM_PLAY_MODE_QUEUE == m_playMode)
+	{
+		if (bNext)
+		{
+			IndexPlay++;
+
+			if (IndexPlay >= NodeStart + FileCount)
+			{
+				IndexPlay = NodeStart;
+			}
+		}
+		else
+		{
+			IndexPlay--;
+
+			if (IndexPlay < NodeStart)
+			{
+				IndexPlay = NodeStart + FileCount - 1;
+			}
+		}
+	}
+	CTreeViewUI *pTree = static_cast<CTreeViewUI*>(m_PaintManager.FindControl(_T("treePlaylist")));
+	if (pTree)
+	{
+		pTree->SelectItem(IndexPlay, true);
+	}
+	m_playlistIndex = IndexPlay;
+
+	return m_cPlayList.GetPlaylist(IndexPlay - NodeStart).c_str();// 完整路径
 }

@@ -18,6 +18,11 @@ void CPlaylist::Add(string_t strPath)
     m_vctPath.push_back(strPath);
 }
 
+void CPlaylist::Delete(int Pos)
+{
+	m_vctPath.erase(m_vctPath.begin() + Pos);
+}
+
 vector<string_t> CPlaylist::GetPlaylist()
 {
     return m_vctPath;
