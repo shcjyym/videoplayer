@@ -6,7 +6,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
     CPaintManagerUI::SetInstance(hInstance);
 	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("skin"));
 	CDuiFrameWnd *pWnd = new CDuiFrameWnd(_T("XMP.xml"));
-	pWnd->Create(NULL, _T("¿ØÖÆ¶Ë"), UI_WNDSTYLE_FRAME, WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES);
+	pWnd->Create(NULL, _T("¿Í»§¶Ë"), UI_WNDSTYLE_FRAME, WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES);
 	pWnd->ShowModal();
 	delete pWnd;
     ::CoUninitialize();

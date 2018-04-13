@@ -22,7 +22,6 @@
      </TreeView>
      <HorizontalLayout name="ctnCirclePlay" height="30" inset="0, 0, 1, 0">
       <Edit name="editPlayDTime" text="播放持续时间(ms)" font="3" textpadding="10,0,8,0" bordersize="1" focusbordercolor="#FF154B83" nativebkcolor="#FF0E0E0E" bkcolor="#FF0E0E0E" textcolor="#FF4B4F51" disabledtextcolor="#FFA7A6AA" />
-      <Edit name="editCirclePlay" text="循环播放次数(次)" font="3" textpadding="10,0,8,0" bordersize="1" focusbordercolor="#FF154B83" nativebkcolor="#FF0E0E0E" bkcolor="#FF0E0E0E" textcolor="#FF4B4F51" disabledtextcolor="#FFA7A6AA" />
       <Button name="btnSetInit" tooltip="重置" width="20" textcolor="#FF000000" disabledtextcolor="#FFA7A66A" align="center" normalimage="file=&apos;btn_refresh.png&apos; source=&apos;0,0,18,18&apos; dest='1,4,19,22' " hotimage="file=&apos;btn_refresh.png&apos; source=&apos;19,0,37,18&apos; dest='1,4,19,22' " pushedimage="file=&apos;btn_refresh.png&apos; source=&apos;38,0,56,18&apos; dest='1,4,19,22' " /> 
       <Button name="btnSetOk" tooltip="确认" width="20" textcolor="#FF000000" disabledtextcolor="#FFA7A66A" align="center" normalimage="file=&apos;btn_ok.png&apos; source=&apos;0,0,18,18&apos; dest='1,4,19,22' " hotimage="file=&apos;btn_ok.png&apos; source=&apos;19,0,37,18&apos; dest='1,4,19,22' " pushedimage="file=&apos;btn_ok.png&apos; source=&apos;38,0,56,18&apos; dest='1,4,19,22' " />
     </HorizontalLayout>

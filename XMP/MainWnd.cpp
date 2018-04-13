@@ -14,7 +14,7 @@
 
 const UINT_PTR TAG = 1;
 
-#define WM_USER_PLAYING               WM_USER + 1// 开始播放文件
+#define WM_USER_PLAYING               WM_USER + 1// 正在播放文件
 #define WM_USER_POS_CHANGED    WM_USER + 2// 文件播放位置改变
 #define WM_USER_END_REACHED     WM_USER + 3// 播放完毕
 #define WM_USER_ADD_IP                 WM_USER + 4// 通信连接后显示设备IP地址
@@ -247,7 +247,7 @@ void CDuiFrameWnd::InitWindow()
 	CControlUI *pbtnCloseConnect = m_PaintManager.FindControl(_T("btnCloseConnect"));
 	pbtnCloseConnect->SetEnabled(0);// 初始化关闭连接按钮
 
-	m_cAVPlayer.Play("test1.avi");//添加此处以加载通信部分需要的dll文件。不添加的结果是无法在播放视频前建立通信，此处需要修正
+	m_cAVPlayer.Play("test1.avi");// 添加此处以加载通信部分需要的dll文件。不添加的结果是无法在播放视频前建立通信，此处需要修正
 	Stop();
 }
 
@@ -379,12 +379,16 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
 		m_cAVPlayer.SetTime(adjust_time);
 	}
+	else if (msg.pSender->GetName() == _T("btnSetInit"))
+	{
+		during_time = 0;
+		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editPlayDTime")));
+		pUI->SetText(_T("播放持续时间(ms)"));
+	}
 	else if (msg.pSender->GetName() == _T("btnSetOk"))
 	{
-		CEditUI* pUI1 = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editCirclePlay")));
-		CEditUI* pUI2 = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editPlayDTime")));
-		circle_time = _ttoi(pUI1->GetText());
-		during_time = _ttoi(pUI2->GetText());
+		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editPlayDTime")));
+		during_time = _ttoi(pUI->GetText());
 	}
 	else if (msg.pSender->GetName() == _T("btnPlayMode"))
 	{
@@ -863,34 +867,16 @@ LRESULT CDuiFrameWnd::OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam )
 	m_Slider->SetValue(m_cAVPlayer.GetPos());
 	if (synTime > during_time&&during_time > 0)// 消息传回过程中加入过多判断可能负荷过大
 	{
-		if (circle_time > 1)
-		{
-			m_cAVPlayer.SeekTo(0);
-			circle_time--;
-		}
-		else 
-		{
-			Stop();
-		}
+		Stop();
 	}
 	return TRUE;
 }
 
-LRESULT CDuiFrameWnd::OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam )
+LRESULT CDuiFrameWnd::OnEndReached(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-	if (circle_time > 1)
-	{
-		Play(m_strPath);
-		Play(true);
-		circle_time--;
-		return TRUE;
-	}
-	else
-	{
-		Play(GetNextPath(true));
-		Play(true);
-		return TRUE;
-	}
+	Play(GetNextPath(true));
+	Play(true);
+	return TRUE;
 }
 
 LRESULT CDuiFrameWnd::OnAddIP(HWND hwnd, WPARAM wParam, LPARAM lParam)
