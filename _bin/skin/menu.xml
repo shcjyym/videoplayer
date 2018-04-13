@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window size="70,65">
+<VerticalLayout bkcolor="#FF2F2F2F">
+	<List header="hidden"  itemtextcolor="#FFC8C6CB" itemselectedtextcolor="#FFC8C6CB" itemhottextcolor="#FFC8C6CB" itembkcolor="#FF2E2E2E" itemselectedbkcolor="#FF191919" itemhotbkcolor="#FF191919">
+    
+    <ListContainerElement name="menuSingleCircle" height="20" inset="10,0,0,0" >
+      <Label text="单次循环"  textcolor="#FFC8C6CB" />
+    </ListContainerElement>
+		<ListContainerElement name="menuSequence" height="20" inset="10,0,0,0">
+			<Label text="顺序播放" textcolor="#FFC8C6CB"  />
+		</ListContainerElement>
+		<ListContainerElement name="menuRandom" height="20" inset="10,0,0,0">
+			<Label text="随机播放" textcolor="#FFC8C6CB"  />
+		</ListContainerElement>
+	
+  </List>
+</VerticalLayout>
+</Window>
