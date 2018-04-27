@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<Window size="236,480">
+<Window size="240,480">
   <VerticalLayout name="ctnPlaylist" bkcolor="#FF111111" width="300">
     <TreeView name="treePlaylist" childpadding="4" multipleitem="true" inset="4,0,3,0" bordersize="1" bordercolor="#FF2B2B2B" itemtextcolor="#FFC8C6CB" itemhottextcolor="#FFC8C6CB" selitemtextcolor="#FFC8C6CB" itemhotbkcolor="#FF1B1B1B" itemselectedbkcolor="#FF151C2C" vscrollbar="true" hscrollbar="true" >
       <TreeNode name="nodePlaylist" text="播放列表" height="30" bkimage="treeview_header_expand.png" itemattr="valign=&quot;vcenter&quot; font=&quot;1&quot; textpadding=&quot;12,0,0,0&quot;" folderattr="width=&quot;0&quot; float=&quot;true&quot;">

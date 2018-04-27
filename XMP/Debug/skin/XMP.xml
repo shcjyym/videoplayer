@@ -7,20 +7,20 @@
         <Caption height="40" />
         <TabLayout name="tabCaption">
             <HorizontalLayout>
-                <Playlist  width="270"/>
+                <Playlist  width="240"/>
                 <VerticalLayout>
-                    <HorizontalLayout name="ctnURL" height="30" inset="0, 0, 1, 0">
-                        <Edit name="editURL" text="请输入播放地址" font="3" textpadding="10,0,8,0" bordersize="1" focusbordercolor="#FF154B83" nativebkcolor="#FF0E0E0E" bkcolor="#FF0E0E0E" textcolor="#FF4B4F51" disabledtextcolor="#FFA7A6AA" />
-                        <Button name="btnRefresh" width="20" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_refresh.png&apos; source=&apos;0,0,18,18&apos; dest='1,4,19,22' " hotimage="file=&apos;btn_refresh.png&apos; source=&apos;19,0,37,18&apos; dest='1,4,19,22' " pushedimage="file=&apos;btn_refresh.png&apos; source=&apos;38,0,56,18&apos; dest='1,4,19,22' " />
-                    </HorizontalLayout>
                     <HorizontalLayout name="ctnClient"> 
                         <VerticalLayout />
-                        <VerticalLayout width="336">
+                        <VerticalLayout width="360">
                             <HorizontalLayout />
                             <HorizontalLayout height="290">
                                 <Control float="true" pos="15,52,0,0" width="336" height="164" bkimage="bk_logo_image.png" />
                                 <Button name="btnOpen" float="true" pos="100,200,0,0" width="160" height="40" bkimage="file=&apos;btn_bk.png&apos;" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" pushedimage="file=&apos;btn_open.png&apos; source=&apos;0,0,88,20&apos; dest=&apos;38,13,126,29&apos; " hotimage="file=&apos;btn_open.png&apos; source=&apos;89,0,177,16&apos; dest=&apos;38,13,126,29&apos; " normalimage="file=&apos;btn_open.png&apos; source=&apos;178,0,266,16&apos; dest=&apos;38,13,126,29&apos; " />
                                 </HorizontalLayout>
+                            <HorizontalLayout name="ctnURL" height="30" inset="0, 0, 1, 0">
+                                <Edit name="editURL" text="请输入播放地址" font="3" textpadding="10,0,10,0" bordersize="1" focusbordercolor="#FF154B83" nativebkcolor="#FF0E0E0E" bkcolor="#FF0E0E0E" textcolor="#FF4B4F51" disabledtextcolor="#FFA7A6AA" />
+                                <Button name="btnRefresh" width="20" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_ok.png&apos; source=&apos;0,0,18,18&apos; dest='1,4,19,22' " hotimage="file=&apos;btn_ok.png&apos; source=&apos;19,0,37,18&apos; dest='1,4,19,22' " pushedimage="file=&apos;btn_ok.png&apos; source=&apos;38,0,56,18&apos; dest='1,4,19,22' " />
+                            </HorizontalLayout>
                             <HorizontalLayout />
                         </VerticalLayout>
                         <VerticalLayout />

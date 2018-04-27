@@ -1,4 +1,5 @@
 #include<winsock2.h>
+#include <ws2tcpip.h>
 #include "MainWnd.h"
 #include "source.h"
 #include <algorithm>
@@ -22,12 +23,12 @@ const UINT_PTR TAG = 1;
 
 //文件类型
 const TCHAR STR_FILE_FILTER[] =
-_T("All Files(*.*)\0*.*\0")
-_T("Movie Files(*.rmvb,*.mpeg,etc)\0*.rm;*.rmvb;*.flv;*.f4v;*.avi;*.3gp;*.mp4;*.wmv;*.mpeg;*.mpga;*.asf;*.dat;*.mov;*.dv;*.mkv;*.mpg;*.trp;*.ts;*.vob;*.xv;*.m4v;*.dpg;\0");
+//_T("All Files(*.*)\0*.*\0")
+_T("Movie Files(*.rmvb,*.mpeg,etc)|*.avi;*.mp4;*.mov;*.rmvb;*.flv;*.3gp;*.wmv;*.mpeg;*.mpga;*.mkv;*.mpg;*.ts;|");
 
 // 查找
 const TCHAR STR_FILE_MOVIE[] =
-_T("Movie Files(*.rmvb,*.mpeg,etc)|*.rm;*.rmvb;*.flv;*.f4v;*.avi;*.3gp;*.mp4;*.wmv;*.mpeg;*.mpga;*.asf;*.dat;*.mov;*.dv;*.mkv;*.mpg;*.trp;*.ts;*.vob;*.xv;*.m4v;*.dpg;|");
+_T("Movie Files(*.rmvb,*.mpeg,etc)|*.avi;*.mp4;*.mov;*.rmvb;*.flv;*.3gp;*.wmv;*.mpeg;*.mpga;*.mkv;*.mpg;*.ts;|");
 
 std::string UnicodeConvert(const std::wstring& strWide, UINT uCodePage)
 {
@@ -68,7 +69,7 @@ bool FindFile(LPCTSTR pstrPath, LPCTSTR pstrExtFilter)
 
 bool Movie(LPCTSTR pstrPath)
 {
-    return FindFile(pstrPath, STR_FILE_MOVIE);
+    return FindFile(pstrPath, STR_FILE_FILTER);
 }
 
 bool WantedFile(LPCTSTR pstrPath)
@@ -137,7 +138,7 @@ CDuiFrameWnd::~CDuiFrameWnd()
 
 SOCKET serSocket; // 建立服务器
 sockaddr_in serAddr; // 服务器地址
-sockaddr_in remoteAddr; // 远程控制客户端地址
+//sockaddr_in remoteAddr; // 远程控制客户端地址
 CDuiString address_ip; // 列表中显示内容
 char recvData[255]; // 获取的数据内容
 int connect_num=1; // 连接数目
@@ -148,20 +149,22 @@ DWORD WINAPI CDuiFrameWnd::CmuThreadProc(LPVOID lpParameter)
 	CDuiFrameWnd* pDlg;
 	pDlg = (CDuiFrameWnd*)lpParameter;
 	WSADATA wsaData;
-	WORD sockVersion = MAKEWORD(2, 2);
-	serSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	int n = 1;
+	serSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	setsockopt(serSocket, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&n, sizeof(n));
+	serAddr.sin_addr.S_un.S_addr = inet_addr("234.2.2.2");
 	serAddr.sin_family = AF_INET;
 	serAddr.sin_port = htons(8888);
-	serAddr.sin_addr.S_un.S_addr = INADDR_ANY;
-	if (bind(serSocket, (sockaddr *)&serAddr, sizeof(serAddr)) == SOCKET_ERROR)
+	/*if (bind(serSocket, (sockaddr *)&serAddr, sizeof(serAddr)) == SOCKET_ERROR)
 	{
 		closesocket(serSocket);
 	}
 	int nAddrLen = sizeof(remoteAddr);
-	int ret = recvfrom(serSocket, recvData, 255, 0, (sockaddr *)&remoteAddr, &nAddrLen);
-	char * sendData = "a";
-	sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
-	if (recvData[0] == '1') {
+	int ret = recvfrom(serSocket, recvData, 255, 0, (sockaddr *)&remoteAddr, &nAddrLen);*/
+	char * sendData = "well connected";
+	sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+	/*if (recvData[0] == '1') {
 		size_t len = strlen(recvData) + 1;
 		size_t converted = 0;
 		wchar_t *WStr;
@@ -170,7 +173,7 @@ DWORD WINAPI CDuiFrameWnd::CmuThreadProc(LPVOID lpParameter)
 		//把char类型的recvData转化为wchar_t类型的WStr,否则显示为乱码
 		address_ip.Format(_T("%s"), WStr);
 		::PostMessage(pDlg->m_hWnd, WM_USER_ADD_IP, 0, 0);
-	}
+	}*/
 	//closesocket(serSocket);//单击连接后按钮禁灰，不关闭套接字
 	return 0;
 }
@@ -183,8 +186,8 @@ DWORD WINAPI CDuiFrameWnd::SynThread(LPVOID lpParameter)
 	{
 		char temp[8];
 		itoa(synTime, temp, 10);
-		int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, temp, strlen(temp), 0, (sockaddr *)&remoteAddr, nAddrLen);
+		//int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, temp, strlen(temp), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
 		::PostMessage(pDlg->m_hWnd, WM_USER_SYN_TIME, 0, 0);
 		Sleep(2000);
 	}
@@ -315,22 +318,22 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
     else if( msg.pSender->GetName() == _T("btnPlay"))
     {
 		char * sendData = "a";
-		int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
+		//int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
 		Play(true);
     }
-    else if( msg.pSender->GetName() == _T("btnPause") ) 
-    {
+	else if (msg.pSender->GetName() == _T("btnPause"))
+	{
 		char * sendData = "b";
-		int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
-        Play(false);
-    }
+		//int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+		Play(false);
+	}
     else if( msg.pSender->GetName() == _T("btnStop"))
     {
 		char * sendData = "c";
-		int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
+		//int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
         Stop();
     }
 	else if (msg.pSender->GetName() == _T("btnFastBackward"))
@@ -375,8 +378,8 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		int adjust_time = _ttoi(pUI->GetText());
 		char sendData[10];
 		itoa(adjust_time, sendData, 10);
-		int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&remoteAddr, nAddrLen);
+		//int nAddrLen = sizeof(remoteAddr);
+		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
 		m_cAVPlayer.SetTime(adjust_time);
 	}
 	else if (msg.pSender->GetName() == _T("btnSetInit"))
@@ -408,12 +411,12 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	{
 		CTreeNodeUI  *pNodePlaylist, *pNodeTemp;
 		pNodePlaylist = static_cast<CTreeNodeUI*>(m_PaintManager.FindControl(_T("nodePlaylist")));
-	    pNodeTemp = pNodePlaylist->GetChildNode(m_playlistIndex-1);
-	    pNodePlaylist->Remove(pNodeTemp);
-		m_cPlayList.Delete(m_playlistIndex-2);
+		pNodeTemp = pNodePlaylist->GetChildNode(m_playlistIndex - 1);
+		pNodePlaylist->Remove(pNodeTemp);
+		m_cPlayList.Delete(m_playlistIndex - 2);
 	}
 
-    __super::OnClick(msg);
+	__super::OnClick(msg);
 }
 
 void CDuiFrameWnd::Notify( TNotifyUI& msg )
@@ -424,6 +427,9 @@ void CDuiFrameWnd::Notify( TNotifyUI& msg )
 		if (pTree && -1 != pTree->GetItemIndex(msg.pSender) && TAG == msg.pSender->GetTag())
 		{
 			Stop();
+			char * sendData = "a";
+			//int nAddrLen = sizeof(remoteAddr);
+			sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
 			m_playlistIndex = pTree->GetItemIndex(msg.pSender);
 			Play(m_cPlayList.GetPlaylist(GetPlaylistIndex(m_playlistIndex)).c_str());
 		}
@@ -512,7 +518,7 @@ LRESULT CDuiFrameWnd::HandleMessage( UINT uMsg, WPARAM wParam, LPARAM lParam )
     {
         HANDLE_MSG (*this, WM_DISPLAYCHANGE, OnDisplayChange);
         HANDLE_MSG (*this, WM_GETMINMAXINFO, OnGetMinMaxInfo);
-
+		
     case WM_USER_PLAYING:
         return OnPlaying(*this, wParam, lParam);
 	case WM_USER_POS_CHANGED:
@@ -832,13 +838,13 @@ void CDuiFrameWnd::FullScreen( bool bFull )
             }
             ::SetWindowPos(*this, HWND_TOPMOST, -iBorderX, -iBorderY, GetSystemMetrics(SM_CXSCREEN) + 2 * iBorderX, GetSystemMetrics(SM_CYSCREEN) + 2 * iBorderY, 0);
             ShowPlaylist(false);
-        } 
+        }
         else
         {
             ::SetWindowPlacement(*this, &m_OldWndPlacement);
             ::SetWindowPos(*this, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
         }
-
+		
         pbtnNormal->SetVisible(bFull);
         pUICaption->SetVisible(! bFull);
         pbtnFull->SetVisible(! bFull);
