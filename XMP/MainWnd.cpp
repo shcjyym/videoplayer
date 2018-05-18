@@ -143,6 +143,7 @@ CDuiString address_ip; // 列表中显示内容
 char recvData[255]; // 获取的数据内容
 int connect_num=1; // 连接数目
 int synTime = 0; // 当前时间
+float rate = 1;
 bool flag = true;
 DWORD WINAPI CDuiFrameWnd::CmuThreadProc(LPVOID lpParameter)
 {
@@ -345,6 +346,28 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	{
 		m_cAVPlayer.SeekForward();
 		::PostMessage(*this, WM_USER_POS_CHANGED, 0, m_cAVPlayer.GetPos());
+	}
+	else if (msg.pSender->GetName() == _T("btnPlaySlow"))
+	{
+		if (rate == 1) {
+			rate = 0.5;
+		}
+		else if (rate == 2)
+		{
+			rate = 1;
+		}
+		m_cAVPlayer.SetRate(rate);
+	}
+	else if (msg.pSender->GetName() == _T("btnPlayFast"))
+	{
+		if (rate == 0.5) {
+			rate = 1;
+		}
+		else if (rate == 1)
+		{
+			rate = 2;
+		}
+		m_cAVPlayer.SetRate(rate);
 	}
 	else if (msg.pSender->GetName() == _T("btnScreenNormal"))
 	{
@@ -873,7 +896,8 @@ LRESULT CDuiFrameWnd::OnPosChanged(HWND hwnd, WPARAM wParam, LPARAM lParam )
 	m_Slider->SetValue(m_cAVPlayer.GetPos());
 	if (synTime > during_time&&during_time > 0)// 消息传回过程中加入过多判断可能负荷过大
 	{
-		Stop();
+		Play(GetNextPath(true));
+		Play(true);
 	}
 	return TRUE;
 }

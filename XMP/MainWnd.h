@@ -1,7 +1,7 @@
 #pragma once
 #include "duilib.h"
 #include <deque>
-#include "../_include/xmp/AVPlayer.h"
+#include "../_include/xmp/Player.h"
 #include "PlayList.h"
 
 //播放模式定义

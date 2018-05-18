@@ -16,7 +16,7 @@
     <TreeView name="treeConnectlist" childpadding="4" multipleitem="true" inset="4,0,3,0" bordersize="1" bordercolor="#FF2B2B2B" itemtextcolor="#FFC8C6CB" itemhottextcolor="#FFC8C6CB" selitemtextcolor="#FFC8C6CB" itemhotbkcolor="#FF1B1B1B" itemselectedbkcolor="#FF151C2C" vscrollbar="true" hscrollbar="true" >
       <TreeNode name="nodeConnectlist" text="节点列表" height="30" bkimage="treeview_header_expand.png" itemattr="valign=&quot;vcenter&quot; font=&quot;1&quot; textpadding=&quot;12,0,0,0&quot;" folderattr="width=&quot;0&quot; float=&quot;true&quot;">
       <TreeNode text="连接信息" inset="60,0,0,0" height="20" itemattr="valign=&quot;vcenter&quot; font=&quot;1&quot; textpadding=&quot;6,0,0,0&quot;">
-    	</TreeNode>
+      </TreeNode>
       </TreeNode>
       <TreeNode></TreeNode>
      </TreeView>

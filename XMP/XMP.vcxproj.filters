@@ -30,22 +30,19 @@
     <ClCompile Include="PlayList.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\_include\xmp\AVPlayer.cpp">
-      <Filter>VLC</Filter>
-    </ClCompile>
     <ClCompile Include="MenuWnd.cpp">
       <Filter>duilib</Filter>
     </ClCompile>
     <ClCompile Include="MainWnd.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\_include\xmp\Player.cpp">
+      <Filter>VLC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlayList.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_include\xmp\AVPlayer.h">
-      <Filter>VLC</Filter>
     </ClInclude>
     <ClInclude Include="duilib.h">
       <Filter>duilib</Filter>
@@ -61,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="source.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_include\xmp\Player.h">
+      <Filter>VLC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

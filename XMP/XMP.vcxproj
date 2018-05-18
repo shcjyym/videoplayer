@@ -101,14 +101,14 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\_include\xmp\AVPlayer.cpp" />
+    <ClCompile Include="..\_include\xmp\Player.cpp" />
     <ClCompile Include="MainWnd.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MenuWnd.cpp" />
     <ClCompile Include="PlayList.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_include\xmp\AVPlayer.h" />
+    <ClInclude Include="..\_include\xmp\Player.h" />
     <ClInclude Include="DefineUnicode.h" />
     <ClInclude Include="MainWnd.h" />
     <ClInclude Include="duilib.h" />
