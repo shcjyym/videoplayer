@@ -1,14 +1,19 @@
-﻿  AVPlayer.cpp
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Release\) contains files shared from another project (XMP.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Player.cpp
   MainWnd.cpp
-d:\project\player\duilib\Core/UIManager.h(45): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
-MainWnd.cpp(173): warning C4101: “wsaData”: 未引用的局部变量
-MainWnd.cpp(488): warning C4101: “pNodeTmp”: 未引用的局部变量
+d:\project\player\duilib\Core/UIManager.h(44): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
+MainWnd.cpp(198): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  C:\Program Files (x86)\Windows Kits\8.1\Include\um\winsock2.h(1850): note: 参见“inet_addr”的声明
+MainWnd.cpp(192): warning C4101: “Cmd”: 未引用的局部变量
+MainWnd.cpp(352): warning C4305: “参数”: 从“int”到“bool”截断
+MainWnd.cpp(831): warning C4305: “参数”: 从“int”到“bool”截断
+MainWnd.cpp(929): warning C4244: “=”: 从“__int64”转换到“int”，可能丢失数据
   main.cpp
-d:\project\player\duilib\Core/UIManager.h(45): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
+d:\project\player\duilib\Core/UIManager.h(44): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
   MenuWnd.cpp
-d:\project\player\duilib\Core/UIManager.h(45): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
+d:\project\player\duilib\Core/UIManager.h(44): warning C4091: “typedef ”: 没有声明变量时忽略“DuiLib::EVENTTYPE_UI”的左侧
   PlayList.cpp
   正在生成代码
   已完成代码的生成
-  XMP.vcxproj -> D:\Project\Player\XMP\Release\XMP.exe
-  XMP.vcxproj -> Release\XMP.pdb (Full PDB)
+  XMP.vcxproj -> D:\Project\Player\XMP\Release\Player.exe
+  XMP.vcxproj -> Release\Player.pdb (Full PDB)

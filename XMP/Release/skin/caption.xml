@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<Window size="854,40">
+<Window size="840,40">
   <HorizontalLayout name="ctnCaption" bkimage="caption_bk.png" bkcolor="#FF0E1A2F" bkcolor2="#FF060606">
     <VerticalLayout width="550">
       <Button name="btnMenu" float="true" pos="10,7,0,0" width="38" height="26" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_menu.png&apos; source=&apos;0,0,38,26&apos;" hotimage="file=&apos;btn_menu.png&apos; source=&apos;117,0,155,26&apos;" pushedimage="file=&apos;btn_menu.png&apos; source=&apos;78,0,116,26&apos;" focusedimage="file=&apos;btn_menu.png&apos; source=&apos;39,0,77,26&apos;" />
-      <Option name="tabClient" text="客户端" float="true" pos="66,0,0,0" width="88" height="38" textcolor="#FF8F99A4" disabledtextcolor="#FFA7A6AA" font="1" align="center" hottextcolor="#FF084DC8" group="caption" selected="true" selectedimage="light_top.png" />
-      <Option name="tabWeb" text="网页" float="true" pos="165,0,0,0" width="88" height="38" textcolor="#FF8F99A4" disabledtextcolor="#FFA7A6AA" font="0" align="center" hottextcolor="#FF084DC8" group="caption" selectedimage="light_top.png" />
+      <Option name="tabClient" text="客户端" float="true" pos="66,0,0,0" width="88" height="38" textcolor="#FF8F99A4" disabledtextcolor="#FFA7A6AA" font="1" align="center" hottextcolor="#FF084DC8" group="caption" selected="true" selectedimage="btn_bk.png" />
+      <Option name="tabWeb" text="网页" float="true" pos="165,0,0,0" width="88" height="38" textcolor="#FF8F99A4" disabledtextcolor="#FFA7A6AA" font="0" align="center" hottextcolor="#FF084DC8" group="caption" selectedimage="btn_bk.png" />
     </VerticalLayout>
     <VerticalLayout />
     <VerticalLayout width="160" height="30">

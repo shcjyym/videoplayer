@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<Window size="609,75">
+<Window size="608,75">
     <VerticalLayout name="ctnPlayWnd" bkcolor="#FF070707">
         <HorizontalLayout height="20">
             <HorizontalLayout name="ctnSlider" visible="false">
@@ -22,7 +22,7 @@
                 <Button name="btnCloseConnect" tooltip="关闭通信连接" float="true" pos="81,19,0,0" width="18" height="18" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_close_socket.png&apos; source=&apos;0,0,18,18&apos;" hotimage="file=&apos;btn_close_socket.png&apos; source=&apos;19,0,37,18&apos;" pushedimage="file=&apos;btn_close_socket.png&apos; source=&apos;38,0,56,18&apos;" />
                 <Label name="labelPlayTime" font="2" float="true" pos="10,1,0,0" width="120" height="18" textcolor="#FF85909F" align="center" />
             </VerticalLayout>
-            <VerticalLayout width="350" height="48">
+            <VerticalLayout width="360" height="48">
                 <Button name="btnPlay" tooltip="播放" float="true" pos="142,1,0,0" width="48" height="48" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_play.png&apos; source=&apos;0,0,48,50&apos;" hotimage="file=&apos;btn_play.png&apos; source=&apos;49,0,97,48&apos;" pushedimage="file=&apos;btn_play.png&apos; source=&apos;98,0,146,48&apos;" />
                 <Button name="btnStop" tooltip="停止" float="true" enabled="false" pos="190,6,0,0" width="40" height="40" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_stop.png&apos; source=&apos;0,0,40,40&apos;" hotimage="file=&apos;btn_stop.png&apos; source=&apos;41,0,81,40&apos;" pushedimage="file=&apos;btn_stop.png&apos; source=&apos;82,0,122,40&apos;" disabledimage="file=&apos;btn_stop.png&apos; source=&apos;123,0,163,40&apos;" />
                 <Button name="btnPause" tooltip="暂停" visible="false" float="true" pos="142,1,0,0" width="48" height="48" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_pause.png&apos; source=&apos;0,0,48,50&apos;" hotimage="file=&apos;btn_pause.png&apos; source=&apos;49,0,97,48&apos;" pushedimage="file=&apos;btn_pause.png&apos; source=&apos;98,0,146,48&apos;" />
@@ -33,10 +33,12 @@
             <VerticalLayout>
                 <HorizontalLayout>
                     <VerticalLayout />
-                    <VerticalLayout width="60">
-                      <Button name="btnOpenMini" tooltip="打开文件" float="true" pos="7,18,0,0" width="24" height="18" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_open_mini.png&apos; source=&apos;0,0,24,18&apos;" hotimage="file=&apos;btn_open_mini.png&apos; source=&apos;25,0,49,18&apos;" pushedimage="file=&apos;btn_open_mini.png&apos; source=&apos;50,0,74,18&apos;" />
-                        <Button name="btnScreenFull" tooltip="全屏" float="true" enabled="false" pos="31,18,0,0" width="24" height="18" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_screen_full.png&apos; source=&apos;0,0,24,18&apos;" hotimage="file=&apos;btn_screen_full.png&apos; source=&apos;25,0,49,18&apos;" pushedimage="file=&apos;btn_screen_full.png&apos; source=&apos;50,0,74,18&apos;" disabledimage="file=&apos;btn_screen_full.png&apos; source=&apos;75,0,99,18&apos;" />
-                        <Button name="btnScreenNormal" tooltip="退出全屏" visible="false" float="true" pos="31,18,0,0" width="24" height="18" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_screen_normal.png&apos; source=&apos;0,0,24,18&apos;" hotimage="file=&apos;btn_screen_normal.png&apos; source=&apos;25,0,49,18&apos;" pushedimage="file=&apos;btn_screen_normal.png&apos; source=&apos;50,0,74,18&apos;" disabledimage="file=&apos;btn_screen_normal.png&apos; source=&apos;75,0,99,18&apos;" />
+                    <VerticalLayout width="120"> 
+                        <Button name="btnPlaySlow" tooltip="慢速播放" float="true" pos="0,20,0,0" width="17" height="13" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_fast_backward.png&apos; source=&apos;0,0,17,13&apos;" hotimage="file=&apos;btn_fast_backward.png&apos; source=&apos;18,0,35,13&apos;" pushedimage="file=&apos;btn_fast_backward.png&apos; source=&apos;36,0,53,13&apos;" />
+                        <Button name="btnPlayFast" tooltip="快速播放" float="true" pos="30,20,0,0" width="17" height="13" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_fast_forward.png&apos; source=&apos;0,0,17,13&apos;" hotimage="file=&apos;btn_fast_forward.png&apos; source=&apos;18,0,35,13&apos;" pushedimage="file=&apos;btn_fast_forward.png&apos; source=&apos;36,0,53,13&apos;" />
+                        <Button name="btnOpenMini" tooltip="打开文件" float="true" pos="60,18,0,0" width="24" height="18" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_open_mini.png&apos; source=&apos;0,0,24,18&apos;" hotimage="file=&apos;btn_open_mini.png&apos; source=&apos;25,0,49,18&apos;" pushedimage="file=&apos;btn_open_mini.png&apos; source=&apos;50,0,74,18&apos;" />
+                        <Button name="btnScreenFull" tooltip="全屏" float="true" enabled="false" pos="90,18,0,0" width="24" height="18" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_screen_full.png&apos; source=&apos;0,0,24,18&apos;" hotimage="file=&apos;btn_screen_full.png&apos; source=&apos;25,0,49,18&apos;" pushedimage="file=&apos;btn_screen_full.png&apos; source=&apos;50,0,74,18&apos;" disabledimage="file=&apos;btn_screen_full.png&apos; source=&apos;75,0,99,18&apos;" />
+                        <Button name="btnScreenNormal" tooltip="退出全屏" visible="false" float="true" pos="90,18,0,0" width="24" height="18" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" normalimage="file=&apos;btn_screen_normal.png&apos; source=&apos;0,0,24,18&apos;" hotimage="file=&apos;btn_screen_normal.png&apos; source=&apos;25,0,49,18&apos;" pushedimage="file=&apos;btn_screen_normal.png&apos; source=&apos;50,0,74,18&apos;" disabledimage="file=&apos;btn_screen_normal.png&apos; source=&apos;75,0,99,18&apos;" />
                     </VerticalLayout>
                 </HorizontalLayout>
             </VerticalLayout>

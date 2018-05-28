@@ -141,14 +141,55 @@ sockaddr_in serAddr; // 服务器地址
 //sockaddr_in remoteAddr; // 远程控制客户端地址
 CDuiString address_ip; // 列表中显示内容
 char recvData[255]; // 获取的数据内容
+char buf[1000]; // 发送数据内容
 int connect_num=1; // 连接数目
 int synTime = 0; // 当前时间
 float rate = 1;
 bool flag = true;
+
+struct Command
+{
+	uint16_t head;
+	uint16_t type;
+	uint16_t order;
+	SYSTEMTIME time;
+	uint16_t tail;
+};
+
+void Sendto(int head, int type, int order)
+{
+	Command Cmd;
+	Cmd.head = 0x01;
+	Cmd.type = 0x01;
+	Cmd.order = 0x01;
+	GetLocalTime(&Cmd.time);
+	Cmd.tail = 0xf0;
+
+	Cmd.head = head;
+	Cmd.type = type;
+	Cmd.order = order;
+
+	char *p = buf;
+	*((uint16_t*)p) = Cmd.head;
+	p += sizeof(uint16_t);
+	*((uint16_t*)p) = Cmd.type;
+	p += sizeof(uint16_t);
+	*((uint16_t*)p) = Cmd.order;
+	p += sizeof(uint16_t);
+	//获取尽可能接近的命令发送时间信息
+	GetLocalTime(&Cmd.time);
+	*((SYSTEMTIME*)p) = Cmd.time;
+	p += sizeof(SYSTEMTIME);
+	*((uint16_t*)p) = Cmd.tail;
+
+	sendto(serSocket, buf, sizeof(buf), 0, (struct sockaddr*)&serAddr, sizeof(serAddr));
+};
+
 DWORD WINAPI CDuiFrameWnd::CmuThreadProc(LPVOID lpParameter)
 {
 	CDuiFrameWnd* pDlg;
 	pDlg = (CDuiFrameWnd*)lpParameter;
+	Command Cmd;
 	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	int n = 1;
@@ -163,9 +204,10 @@ DWORD WINAPI CDuiFrameWnd::CmuThreadProc(LPVOID lpParameter)
 	}
 	int nAddrLen = sizeof(remoteAddr);
 	int ret = recvfrom(serSocket, recvData, 255, 0, (sockaddr *)&remoteAddr, &nAddrLen);*/
-	char * sendData = "well connected";
+	Sendto(1, 1, 8);
+	/*char * sendData = "well connected";
 	sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
-	/*if (recvData[0] == '1') {
+	if (recvData[0] == '1') {
 		size_t len = strlen(recvData) + 1;
 		size_t converted = 0;
 		wchar_t *WStr;
@@ -185,13 +227,17 @@ DWORD WINAPI CDuiFrameWnd::SynThread(LPVOID lpParameter)
 	pDlg = (CDuiFrameWnd*)lpParameter;
 	while (flag == true)
 	{
-		char temp[8];
-		itoa(synTime, temp, 10);
-		//int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, temp, strlen(temp), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+		Sendto(1, 4, synTime);
 		::PostMessage(pDlg->m_hWnd, WM_USER_SYN_TIME, 0, 0);
-		Sleep(2000);
+
+		DWORD dwStart = GetTickCount();
+		DWORD dwEnd = dwStart;
+		do
+		{
+			dwEnd = GetTickCount() - dwStart;
+		} while (dwEnd < 3000);
 	}
+
 	return 0;
 }
 
@@ -305,7 +351,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 		pbtnGetConnect->SetEnabled(0);
 		pbtnCloseConnect->SetEnabled(-1);
 		hThread_Communication = ::CreateThread(NULL, 0, CmuThreadProc, this, 0, NULL);
-		hThread_Synchronize = ::CreateThread(NULL, 0, SynThread, this, 0, NULL);
+		hThread_Synchronize = ::CreateThread(NULL, 0, SynThread, this, 0, NULL);// 关闭原因：发送的实时时间存在误差
 	}
 	else if (msg.pSender->GetName() == _T("btnCloseConnect"))
 	{
@@ -318,23 +364,17 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	}
     else if( msg.pSender->GetName() == _T("btnPlay"))
     {
-		char * sendData = "a";
-		//int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+		Sendto(1, 2, 1);
 		Play(true);
     }
 	else if (msg.pSender->GetName() == _T("btnPause"))
 	{
-		char * sendData = "b";
-		//int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+		Sendto(1, 2, 2);
 		Play(false);
 	}
     else if( msg.pSender->GetName() == _T("btnStop"))
     {
-		char * sendData = "c";
-		//int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+		Sendto(1, 2, 3);
         Stop();
     }
 	else if (msg.pSender->GetName() == _T("btnFastBackward"))
@@ -399,10 +439,7 @@ void CDuiFrameWnd::OnClick( TNotifyUI& msg )
 	{
 		CEditUI* pUI = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("editATime")));
 		int adjust_time = _ttoi(pUI->GetText());
-		char sendData[10];
-		itoa(adjust_time, sendData, 10);
-		//int nAddrLen = sizeof(remoteAddr);
-		sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+		Sendto(1, 3, adjust_time);
 		m_cAVPlayer.SetTime(adjust_time);
 	}
 	else if (msg.pSender->GetName() == _T("btnSetInit"))
@@ -450,9 +487,7 @@ void CDuiFrameWnd::Notify( TNotifyUI& msg )
 		if (pTree && -1 != pTree->GetItemIndex(msg.pSender) && TAG == msg.pSender->GetTag())
 		{
 			Stop();
-			char * sendData = "a";
-			//int nAddrLen = sizeof(remoteAddr);
-			sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *)&serAddr, sizeof(sockaddr));
+			Sendto(1, 1, 1);
 			m_playlistIndex = pTree->GetItemIndex(msg.pSender);
 			Play(m_cPlayList.GetPlaylist(GetPlaylistIndex(m_playlistIndex)).c_str());
 		}
